@@ -17,7 +17,6 @@ library(RCurl)
 #set graph engine default 
 old.par <- par(no.readonly = TRUE)
 
-source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network_Data.rdata?raw=true")
 
 ###################################################################################
 #MAIN
@@ -27,6 +26,9 @@ rm(list=setdiff(ls(), "old.par"))
 
 #reset graph engine 
 par(old.par)
+
+#load data
+source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network_Data.rdata?raw=true")
 
 #partial set 
 par_set <- `Network Data`
