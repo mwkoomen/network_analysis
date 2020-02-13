@@ -9,6 +9,8 @@
 #install.packages("sqldf")
 #install.packages("repmis")
 #install.packages("RCurl")
+#install.packages("igraph")
+library(igraph)
 library(dplyr)
 library(sqldf)
 library(repmis)
@@ -122,3 +124,10 @@ fc2c1 <- full_set %>%
   lines(fc2c1, type = "o", col = "orange")
   legend(1991, 8500, legend=c("C1:Internal", "C1:External", "C2:Internal", "C2:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.6)
+
+#compute eigenvector centrality (example internal value for country 1 in 1991)
+pc1c1_91 <- sqldf("select * from par_set where Year = 1991 and Country_A = 1 and Country_B = 1") 
+graph_11_91 <- graph(c(pc1c1_91$Region_A, pc1c1_91$Region_B)) 
+EV_pc1c1_91 <- eigen_centrality(graph_11_91, weights = pc1c1_91$Intensity_norm)
+  
+  
