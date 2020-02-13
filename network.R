@@ -7,15 +7,18 @@
 
 #install.packages("dplyr")
 #install.packages("sqldf")
+#install.packages("repmis")
+#install.packages("RCurl")
 library(dplyr)
 library(sqldf)
+library(repmis)Y
+library(RCurl)
 
 #set graph engine default 
 old.par <- par(no.readonly = TRUE)
 
-#set wd
-setwd("C:/Users/koomen/Documents/IPSDS/Data Consulting/project")
-
+source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network_Data.rdata?raw=true")
+script <- ("https://github.com/mwkoomen/network_analysis/raw/master/network.R")
 
 ###################################################################################
 #MAIN
@@ -26,11 +29,10 @@ rm(list=setdiff(ls(), "old.par"))
 #reset graph engine 
 par(old.par)
 
-#load data
-load("Network_Data.rdata")
+#partial set 
 par_set <- `Network Data`
 
-#missing connections
+#missing connections for full set
 comp_set <- expand.grid(1991:2017, 1:200, 1:2, 1:200, 1:2)
 dif <- sqldf("
     select 
