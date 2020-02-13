@@ -18,7 +18,6 @@ library(RCurl)
 old.par <- par(no.readonly = TRUE)
 
 source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network_Data.rdata?raw=true")
-script <- ("https://github.com/mwkoomen/network_analysis/raw/master/network.R")
 
 ###################################################################################
 #MAIN
@@ -35,18 +34,21 @@ par_set <- `Network Data`
 #missing connections for full set
 comp_set <- expand.grid(1991:2017, 1:200, 1:2, 1:200, 1:2)
 dif <- sqldf("
-    select 
-      var1 as Year,var2 as Region_A, var3 as Country_A, var4 as Region_B, var5 as Country_B
-    from comp_set 
-      except 
-        select 
-          Year, Region_A, Country_A, Region_B, Country_B
-        from par_set")
+              select 
+                var1 as Year,var2 as Region_A, var3 as Country_A, 
+                var4 as Region_B, var5 as Country_B
+              from comp_set 
+              except 
+              select 
+              Year, Region_A, Country_A, Region_B, Country_B
+              from par_set
+             ")
 nrow(comp_set)-nrow(par_set)==nrow(dif)
 full_set <- sqldf("
-    select * from par_set 
-      union all 
-        select *, 0 from dif")
+                  select * from par_set 
+                    union all 
+                  select *, 0 from dif
+                  ")
 test_unique <- sqldf("
                      select count(*) as rownumb 
                      from full_set 
@@ -119,9 +121,3 @@ fc2c1 <- full_set %>%
   lines(fc2c1, type = "o", col = "orange")
   legend(1991, 8500, legend=c("C1:Internal", "C1:External", "C2:Internal", "C2:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.6)
-
-
-
-
-
-
