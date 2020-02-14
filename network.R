@@ -167,9 +167,270 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
 #This sections computes eigenvector centrality 
 #Currently it is only an example of the internal link intensity for country 1 in 1991 in the partial data set
 #To Do: expand for all years and combination of countries 
-pc1c1_91 <- sqldf("select * from par_set where Year = 1991 and Country_A = 1 and Country_B = 1") 
-graph_11_91 <- graph(c(pc1c1_91$Region_A, pc1c1_91$Region_B)) 
-EV_pc1c1_91 <- eigen_centrality(graph_11_91, weights = pc1c1_91$Intensity_norm)
-EV_pc1c1_91$value
-  
-  
+
+  #Country 1: Internal links 
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
+    x <- sqldf(s)
+    g <- graph(c(x$Region_A, x$Region_B))
+    eigenv <- paste("ev_11_", i, sep="")
+    assign(eigenv, eigen_centrality(g, weights = x$Intensity_norm))
+  }
+  #Country 1: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 2")
+    x <- sqldf(s)
+    g <- graph(c(x$Region_A, x$Region_B))
+    eigenv <- paste("ev_12_", i, sep="")
+    assign(eigenv, eigen_centrality(g, weights = x$Intensity_norm))
+  }
+  #Country 2: Internal links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
+    x <- sqldf(s)
+    g <- graph(c(x$Region_A, x$Region_B))
+    eigenv <- paste("ev_22_", i, sep="")
+    assign(eigenv, eigen_centrality(g, weights = x$Intensity_norm))
+  }
+  #Country 2: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 1")
+    x <- sqldf(s)
+    g <- graph(c(x$Region_A, x$Region_B))
+    eigenv <- paste("ev_21_", i, sep="")
+    assign(eigenv, eigen_centrality(g, weights = x$Intensity_norm))
+  }
+  remove(x,g,i,s,eigenv)
+
+#compile eigenvalues into data frames  
+year <- c(1991:2017)
+#country 1 internal
+eigenvalue <- c(ev_11_1991$value, 
+                ev_11_1992$value, 
+                ev_11_1993$value, 
+                ev_11_1994$value, 
+                ev_11_1995$value,
+                ev_11_1996$value,
+                ev_11_1997$value,
+                ev_11_1998$value,
+                ev_11_1999$value,
+                ev_11_2000$value,
+                ev_11_2001$value,
+                ev_11_2002$value,
+                ev_11_2003$value,
+                ev_11_2004$value,
+                ev_11_2005$value,
+                ev_11_2006$value,
+                ev_11_2007$value,
+                ev_11_2008$value,
+                ev_11_2009$value,
+                ev_11_2010$value,
+                ev_11_2011$value,
+                ev_11_2012$value,
+                ev_11_2013$value,
+                ev_11_2014$value,
+                ev_11_2015$value,
+                ev_11_2016$value,
+                ev_11_2017$value) 
+eigenvalue11 <- data.frame(year, eigenvalue)
+remove(
+  ev_11_1991,
+  ev_11_1992,
+  ev_11_1993,
+  ev_11_1994,
+  ev_11_1995,
+  ev_11_1996,
+  ev_11_1997,
+  ev_11_1998,
+  ev_11_1999,
+  ev_11_2000,
+  ev_11_2001,
+  ev_11_2002,
+  ev_11_2003,
+  ev_11_2004,
+  ev_11_2005,
+  ev_11_2006,
+  ev_11_2007,
+  ev_11_2008,
+  ev_11_2009,
+  ev_11_2010,
+  ev_11_2011,
+  ev_11_2012,
+  ev_11_2013,
+  ev_11_2014,
+  ev_11_2015,
+  ev_11_2016,
+  ev_11_2017)
+#country 1: external
+eigenvalue <- c(ev_12_1991$value, 
+                ev_12_1992$value, 
+                ev_12_1993$value, 
+                ev_12_1994$value, 
+                ev_12_1995$value,
+                ev_12_1996$value,
+                ev_12_1997$value,
+                ev_12_1998$value,
+                ev_12_1999$value,
+                ev_12_2000$value,
+                ev_12_2001$value,
+                ev_12_2002$value,
+                ev_12_2003$value,
+                ev_12_2004$value,
+                ev_12_2005$value,
+                ev_12_2006$value,
+                ev_12_2007$value,
+                ev_12_2008$value,
+                ev_12_2009$value,
+                ev_12_2010$value,
+                ev_12_2011$value,
+                ev_12_2012$value,
+                ev_12_2013$value,
+                ev_12_2014$value,
+                ev_12_2015$value,
+                ev_12_2016$value,
+                ev_12_2017$value) 
+eigenvalue12 <- data.frame(year, eigenvalue)
+remove(
+  ev_12_1991,
+  ev_12_1992,
+  ev_12_1993,
+  ev_12_1994,
+  ev_12_1995,
+  ev_12_1996,
+  ev_12_1997,
+  ev_12_1998,
+  ev_12_1999,
+  ev_12_2000,
+  ev_12_2001,
+  ev_12_2002,
+  ev_12_2003,
+  ev_12_2004,
+  ev_12_2005,
+  ev_12_2006,
+  ev_12_2007,
+  ev_12_2008,
+  ev_12_2009,
+  ev_12_2010,
+  ev_12_2011,
+  ev_12_2012,
+  ev_12_2013,
+  ev_12_2014,
+  ev_12_2015,
+  ev_12_2016,
+  ev_12_2017)
+#country 2: internal
+eigenvalue <- c(ev_22_1991$value, 
+                ev_22_1992$value, 
+                ev_22_1993$value, 
+                ev_22_1994$value, 
+                ev_22_1995$value,
+                ev_22_1996$value,
+                ev_22_1997$value,
+                ev_22_1998$value,
+                ev_22_1999$value,
+                ev_22_2000$value,
+                ev_22_2001$value,
+                ev_22_2002$value,
+                ev_22_2003$value,
+                ev_22_2004$value,
+                ev_22_2005$value,
+                ev_22_2006$value,
+                ev_22_2007$value,
+                ev_22_2008$value,
+                ev_22_2009$value,
+                ev_22_2010$value,
+                ev_22_2011$value,
+                ev_22_2012$value,
+                ev_22_2013$value,
+                ev_22_2014$value,
+                ev_22_2015$value,
+                ev_22_2016$value,
+                ev_22_2017$value) 
+eigenvalue22 <- data.frame(year, eigenvalue)
+remove(
+  ev_22_1991,
+  ev_22_1992,
+  ev_22_1993,
+  ev_22_1994,
+  ev_22_1995,
+  ev_22_1996,
+  ev_22_1997,
+  ev_22_1998,
+  ev_22_1999,
+  ev_22_2000,
+  ev_22_2001,
+  ev_22_2002,
+  ev_22_2003,
+  ev_22_2004,
+  ev_22_2005,
+  ev_22_2006,
+  ev_22_2007,
+  ev_22_2008,
+  ev_22_2009,
+  ev_22_2010,
+  ev_22_2011,
+  ev_22_2012,
+  ev_22_2013,
+  ev_22_2014,
+  ev_22_2015,
+  ev_22_2016,
+  ev_22_2017)
+#country 2: external 
+eigenvalue <- c(ev_21_1991$value, 
+                ev_21_1992$value, 
+                ev_21_1993$value, 
+                ev_21_1994$value, 
+                ev_21_1995$value,
+                ev_21_1996$value,
+                ev_21_1997$value,
+                ev_21_1998$value,
+                ev_21_1999$value,
+                ev_21_2000$value,
+                ev_21_2001$value,
+                ev_21_2002$value,
+                ev_21_2003$value,
+                ev_21_2004$value,
+                ev_21_2005$value,
+                ev_21_2006$value,
+                ev_21_2007$value,
+                ev_21_2008$value,
+                ev_21_2009$value,
+                ev_21_2010$value,
+                ev_21_2011$value,
+                ev_21_2012$value,
+                ev_21_2013$value,
+                ev_21_2014$value,
+                ev_21_2015$value,
+                ev_21_2016$value,
+                ev_21_2017$value) 
+eigenvalue21 <- data.frame(year, eigenvalue)
+remove(
+  ev_21_1991,
+  ev_21_1992,
+  ev_21_1993,
+  ev_21_1994,
+  ev_21_1995,
+  ev_21_1996,
+  ev_21_1997,
+  ev_21_1998,
+  ev_21_1999,
+  ev_21_2000,
+  ev_21_2001,
+  ev_21_2002,
+  ev_21_2003,
+  ev_21_2004,
+  ev_21_2005,
+  ev_21_2006,
+  ev_21_2007,
+  ev_21_2008,
+  ev_21_2009,
+  ev_21_2010,
+  ev_21_2011,
+  ev_21_2012,
+  ev_21_2013,
+  ev_21_2014,
+  ev_21_2015,
+  ev_21_2016,
+  ev_21_2017)
+remove(year, eigenvalue)
+        
