@@ -44,9 +44,9 @@ source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network%20
 par_set <- `Network Data`
 
 #If the import doesn't work, you can load the data locally (from the original stata file): 
-your_work_directory <- "C:/Users/User/Documents/network_analysis"
-setwd(your_work_directory)
-par_set <- read.dta13("network_data.dta")
+#your_work_directory <- "C:/Users/User/Documents/network_analysis"
+#setwd(your_work_directory)
+#par_set <- read.dta13("network_data.dta")
 
 
 # Normalize Intensity -----------------------------------------------------
@@ -110,8 +110,8 @@ rm("comp_set", "dif", "test_unique")
 #This code block will plot the link intesity per country (internal/external) per year using the partial 
   pc1c1 <- par_set %>%
     filter(Country_A==1, Country_B==1) %>%
-    group_by(par_set$Year) %>%
-    summarise(mean(par_set$Intensity))
+    group_by(Year) %>%
+    summarise(mean(Intensity))
   pc1c2 <- par_set %>%
     filter(Country_A==1, Country_B==2) %>%
     group_by(Year) %>%
@@ -125,12 +125,12 @@ rm("comp_set", "dif", "test_unique")
     group_by(Year) %>%
     summarise(mean(Intensity))
 #plot
-plot(pc1c1,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
+plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
        main = "Network Intensity (partial)") 
-  lines(pc1c2, type = "o", col = "blue") 
-  lines(pc2c2, type = "o", col = "darkgreen")
-  lines(pc2c1, type = "o", col = "orange")
-  legend(1991, 45000, legend=c("C1:Internal", "C1:External", "C2:Internal", "C2:External"),
+  lines(pc2c1, type = "o", col = "blue") 
+  lines(pc1c1, type = "o", col = "darkgreen")
+  lines(pc1c2, type = "o", col = "orange")
+  legend(1991, 45000, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.5)
 
   
@@ -153,22 +153,23 @@ plot(pc1c1,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
     filter(Country_A==2, Country_B==1) %>%
     group_by(Year) %>%
     summarise(mean(Intensity))
-  plot(fc1c1,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
+  plot(fc1c1,type = "o",col = "darkgreen", xlab = "Year", ylab = "Intensity", 
        main = "Network Intensity (full)") 
-  lines(fc1c2, type = "o", col = "blue") 
-  lines(fc2c2, type = "o", col = "darkgreen")
-  lines(fc2c1, type = "o", col = "orange")
-  legend(1991, 8500, legend=c("C1:Internal", "C1:External", "C2:Internal", "C2:External"),
+  lines(fc1c2, type = "o", col = "orange") 
+  lines(fc2c2, type = "o", col = "red")
+  lines(fc2c1, type = "o", col = "blue")
+  legend(1991, 8500, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.6)
 
 
 # Compute and plot eigenvector centrality ---------------------------------
 
 #This sections computes eigenvector centrality 
-#Currently it is only an example of the internal link intensity for country 1 in 1991
+#Currently it is only an example of the internal link intensity for country 1 in 1991 in the partial data set
 #To Do: expand for all years and combination of countries 
 pc1c1_91 <- sqldf("select * from par_set where Year = 1991 and Country_A = 1 and Country_B = 1") 
 graph_11_91 <- graph(c(pc1c1_91$Region_A, pc1c1_91$Region_B)) 
 EV_pc1c1_91 <- eigen_centrality(graph_11_91, weights = pc1c1_91$Intensity_norm)
+EV_pc1c1_91$value
   
   
