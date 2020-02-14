@@ -13,11 +13,13 @@
 #install.packages("repmis")
 #install.packages("RCurl")
 #install.packages("igraph")
+#install.packages("readstata13")
 
 #Then load the packages into the current working session:
 library(igraph)
 library(dplyr)
 library(sqldf)
+library(readstata13)
 
 #!!!!! Run seperately the first time: this will prompt you with a quesiton if you want to load 
 #external data in a temporary cache or create a seperate folder. Either is fine, 
@@ -37,10 +39,15 @@ rm(list=setdiff(ls(), "old.par"))
 par(old.par)
 
 #This imports the Rdata file from github 
-source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network_Data.rdata?raw=true")
-
 #The data is stored as the partial set of data, i.e. null connections are missing
+source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network%20Data.rdata?raw=true")
 par_set <- `Network Data`
+
+#If the import doesn't work, you can load the data locally (from the original stata file): 
+your_work_directory <- "C:/Users/User/Documents/network_analysis"
+setwd(your_work_directory)
+par_set <- read.dta13("network_data.dta")
+
 
 # Normalize Intensity -----------------------------------------------------
 
@@ -81,7 +88,7 @@ nrow(comp_set)-nrow(par_set)==nrow(dif)
 full_set <- sqldf("
                   select * from par_set 
                     union all 
-                  select *, 0 from dif
+                  select *, 0, 0 from dif
                   ")
 
 #This test makes sure that there are no duplicate rows, grouped by year, country and region
@@ -103,8 +110,8 @@ rm("comp_set", "dif", "test_unique")
 #This code block will plot the link intesity per country (internal/external) per year using the partial 
   pc1c1 <- par_set %>%
     filter(Country_A==1, Country_B==1) %>%
-    group_by(Year) %>%
-    summarise(mean(Intensity))
+    group_by(par_set$Year) %>%
+    summarise(mean(par_set$Intensity))
   pc1c2 <- par_set %>%
     filter(Country_A==1, Country_B==2) %>%
     group_by(Year) %>%
@@ -117,7 +124,8 @@ rm("comp_set", "dif", "test_unique")
     filter(Country_A==2, Country_B==1) %>%
     group_by(Year) %>%
     summarise(mean(Intensity))
-  plot(pc1c1,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
+#plot
+plot(pc1c1,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
        main = "Network Intensity (partial)") 
   lines(pc1c2, type = "o", col = "blue") 
   lines(pc2c2, type = "o", col = "darkgreen")
