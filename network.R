@@ -19,11 +19,10 @@ library(igraph)
 library(dplyr)
 library(sqldf)
 
-#!!!!! Run seperately: this will prompt you with a quesiton if you want to load 
+#!!!!! Run seperately the first time: this will prompt you with a quesiton if you want to load 
 #external data in a temporary cache or create a seperate folder. Either is fine, 
 #but you have to press either Y/n to continue. 
 library(repmis)
-
 
 library(RCurl)
 
