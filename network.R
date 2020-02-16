@@ -433,4 +433,14 @@ remove(
   ev_21_2016,
   ev_21_2017)
 remove(year, eigenvalue)
+
+#plot
+plot(eigenvalue22,type = "o",col = "red", xlab = "Year", ylab = "Centrality", 
+     main = "Eigenvector centrality (partial)") 
+lines(eigenvalue21, type = "o", col = "blue") 
+lines(eigenvalue11, type = "o", col = "darkgreen")
+lines(eigenvalue12, type = "o", col = "orange")
+legend(1991, 1.5, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
+       col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.6)
+
         
