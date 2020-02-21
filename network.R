@@ -131,7 +131,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   lines(pc1c1, type = "o", col = "darkgreen")
   lines(pc1c2, type = "o", col = "orange")
   legend(1991, 45000, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-         col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.5)
+         col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)
 
   
 # Full set link intensity plot --------------------------------------------
@@ -159,14 +159,310 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   lines(fc2c2, type = "o", col = "red")
   lines(fc2c1, type = "o", col = "blue")
   legend(1991, 8500, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
+         col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)
+
+
+
+# Compute and plot degree centrality --------------------------------------
+  nodes <- data.frame(ID=1:200)
+
+  #Country 1: Internal links 
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_11_", i, sep="")
+    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+  }
+  #Country 1: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 2")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_12_", i, sep="")
+    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+  }
+  #Country 2: Internal links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_22_", i, sep="")
+    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+  }
+  #Country 2: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 1")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_21_", i, sep="")
+    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+  }
+  remove(x,i,s,links, nodes, net, n)
+  
+  #compile degree centrality / theorectical max into data frames  
+  year <- c(1991:2017)
+  #country 1: internal
+  cn <- c(deg.cent_11_1991$centralization/deg.cent_11_1991$theoretical_max, 
+          deg.cent_11_1992$centralization/deg.cent_11_1992$theoretical_max, 
+          deg.cent_11_1993$centralization/deg.cent_11_1993$theoretical_max, 
+          deg.cent_11_1994$centralization/deg.cent_11_1994$theoretical_max, 
+          deg.cent_11_1995$centralization/deg.cent_11_1995$theoretical_max,
+          deg.cent_11_1996$centralization/deg.cent_11_1996$theoretical_max,
+          deg.cent_11_1997$centralization/deg.cent_11_1997$theoretical_max,
+          deg.cent_11_1998$centralization/deg.cent_11_1998$theoretical_max,
+          deg.cent_11_1999$centralization/deg.cent_11_1999$theoretical_max,
+          deg.cent_11_2000$centralization/deg.cent_11_2000$theoretical_max,
+          deg.cent_11_2001$centralization/deg.cent_11_2001$theoretical_max,
+          deg.cent_11_2002$centralization/deg.cent_11_2002$theoretical_max,
+          deg.cent_11_2003$centralization/deg.cent_11_2003$theoretical_max,
+          deg.cent_11_2004$centralization/deg.cent_11_2004$theoretical_max,
+          deg.cent_11_2005$centralization/deg.cent_11_2005$theoretical_max,
+          deg.cent_11_2006$centralization/deg.cent_11_2006$theoretical_max,
+          deg.cent_11_2007$centralization/deg.cent_11_2007$theoretical_max,
+          deg.cent_11_2008$centralization/deg.cent_11_2008$theoretical_max,
+          deg.cent_11_2009$centralization/deg.cent_11_2009$theoretical_max,
+          deg.cent_11_2010$centralization/deg.cent_11_2010$theoretical_max,
+          deg.cent_11_2011$centralization/deg.cent_11_2011$theoretical_max,
+          deg.cent_11_2012$centralization/deg.cent_11_2012$theoretical_max,
+          deg.cent_11_2013$centralization/deg.cent_11_2013$theoretical_max,
+          deg.cent_11_2014$centralization/deg.cent_11_2014$theoretical_max,
+          deg.cent_11_2015$centralization/deg.cent_11_2015$theoretical_max,
+          deg.cent_11_2016$centralization/deg.cent_11_2016$theoretical_max,
+          deg.cent_11_2017$centralization/deg.cent_11_2017$theoretical_max
+  )
+  degree_centrality11 <- data.frame(year, cn)
+  remove(
+    deg.cent_11_1991,
+    deg.cent_11_1992,
+    deg.cent_11_1993,
+    deg.cent_11_1994,
+    deg.cent_11_1995,
+    deg.cent_11_1996,
+    deg.cent_11_1997,
+    deg.cent_11_1998,
+    deg.cent_11_1999,
+    deg.cent_11_2000,
+    deg.cent_11_2001,
+    deg.cent_11_2002,
+    deg.cent_11_2003,
+    deg.cent_11_2004,
+    deg.cent_11_2005,
+    deg.cent_11_2006,
+    deg.cent_11_2007,
+    deg.cent_11_2008,
+    deg.cent_11_2009,
+    deg.cent_11_2010,
+    deg.cent_11_2011,
+    deg.cent_11_2012,
+    deg.cent_11_2013,
+    deg.cent_11_2014,
+    deg.cent_11_2015,
+    deg.cent_11_2016,
+    deg.cent_11_2017)
+  #country 1: external
+  cn <- c(deg.cent_12_1991$centralization/deg.cent_12_1991$theoretical_max, 
+          deg.cent_12_1992$centralization/deg.cent_12_1992$theoretical_max, 
+          deg.cent_12_1993$centralization/deg.cent_12_1993$theoretical_max, 
+          deg.cent_12_1994$centralization/deg.cent_12_1994$theoretical_max, 
+          deg.cent_12_1995$centralization/deg.cent_12_1995$theoretical_max,
+          deg.cent_12_1996$centralization/deg.cent_12_1996$theoretical_max,
+          deg.cent_12_1997$centralization/deg.cent_12_1997$theoretical_max,
+          deg.cent_12_1998$centralization/deg.cent_12_1998$theoretical_max,
+          deg.cent_12_1999$centralization/deg.cent_12_1999$theoretical_max,
+          deg.cent_12_2000$centralization/deg.cent_12_2000$theoretical_max,
+          deg.cent_12_2001$centralization/deg.cent_12_2001$theoretical_max,
+          deg.cent_12_2002$centralization/deg.cent_12_2002$theoretical_max,
+          deg.cent_12_2003$centralization/deg.cent_12_2003$theoretical_max,
+          deg.cent_12_2004$centralization/deg.cent_12_2004$theoretical_max,
+          deg.cent_12_2005$centralization/deg.cent_12_2005$theoretical_max,
+          deg.cent_12_2006$centralization/deg.cent_12_2006$theoretical_max,
+          deg.cent_12_2007$centralization/deg.cent_12_2007$theoretical_max,
+          deg.cent_12_2008$centralization/deg.cent_12_2008$theoretical_max,
+          deg.cent_12_2009$centralization/deg.cent_12_2009$theoretical_max,
+          deg.cent_12_2010$centralization/deg.cent_12_2010$theoretical_max,
+          deg.cent_12_2011$centralization/deg.cent_12_2011$theoretical_max,
+          deg.cent_12_2012$centralization/deg.cent_12_2012$theoretical_max,
+          deg.cent_12_2013$centralization/deg.cent_12_2013$theoretical_max,
+          deg.cent_12_2014$centralization/deg.cent_12_2014$theoretical_max,
+          deg.cent_12_2015$centralization/deg.cent_12_2015$theoretical_max,
+          deg.cent_12_2016$centralization/deg.cent_12_2016$theoretical_max,
+          deg.cent_12_2017$centralization/deg.cent_12_2017$theoretical_max
+  )
+  degree_centrality12 <- data.frame(year, cn)
+  remove(
+    deg.cent_12_1991,
+    deg.cent_12_1992,
+    deg.cent_12_1993,
+    deg.cent_12_1994,
+    deg.cent_12_1995,
+    deg.cent_12_1996,
+    deg.cent_12_1997,
+    deg.cent_12_1998,
+    deg.cent_12_1999,
+    deg.cent_12_2000,
+    deg.cent_12_2001,
+    deg.cent_12_2002,
+    deg.cent_12_2003,
+    deg.cent_12_2004,
+    deg.cent_12_2005,
+    deg.cent_12_2006,
+    deg.cent_12_2007,
+    deg.cent_12_2008,
+    deg.cent_12_2009,
+    deg.cent_12_2010,
+    deg.cent_12_2011,
+    deg.cent_12_2012,
+    deg.cent_12_2013,
+    deg.cent_12_2014,
+    deg.cent_12_2015,
+    deg.cent_12_2016,
+    deg.cent_12_2017)
+  #country 2: internal
+  cn <- c(deg.cent_22_1991$centralization/deg.cent_22_1991$theoretical_max, 
+          deg.cent_22_1992$centralization/deg.cent_22_1992$theoretical_max, 
+          deg.cent_22_1993$centralization/deg.cent_22_1993$theoretical_max, 
+          deg.cent_22_1994$centralization/deg.cent_22_1994$theoretical_max, 
+          deg.cent_22_1995$centralization/deg.cent_22_1995$theoretical_max,
+          deg.cent_22_1996$centralization/deg.cent_22_1996$theoretical_max,
+          deg.cent_22_1997$centralization/deg.cent_22_1997$theoretical_max,
+          deg.cent_22_1998$centralization/deg.cent_22_1998$theoretical_max,
+          deg.cent_22_1999$centralization/deg.cent_22_1999$theoretical_max,
+          deg.cent_22_2000$centralization/deg.cent_22_2000$theoretical_max,
+          deg.cent_22_2001$centralization/deg.cent_22_2001$theoretical_max,
+          deg.cent_22_2002$centralization/deg.cent_22_2002$theoretical_max,
+          deg.cent_22_2003$centralization/deg.cent_22_2003$theoretical_max,
+          deg.cent_22_2004$centralization/deg.cent_22_2004$theoretical_max,
+          deg.cent_22_2005$centralization/deg.cent_22_2005$theoretical_max,
+          deg.cent_22_2006$centralization/deg.cent_22_2006$theoretical_max,
+          deg.cent_22_2007$centralization/deg.cent_22_2007$theoretical_max,
+          deg.cent_22_2008$centralization/deg.cent_22_2008$theoretical_max,
+          deg.cent_22_2009$centralization/deg.cent_22_2009$theoretical_max,
+          deg.cent_22_2010$centralization/deg.cent_22_2010$theoretical_max,
+          deg.cent_22_2011$centralization/deg.cent_22_2011$theoretical_max,
+          deg.cent_22_2012$centralization/deg.cent_22_2012$theoretical_max,
+          deg.cent_22_2013$centralization/deg.cent_22_2013$theoretical_max,
+          deg.cent_22_2014$centralization/deg.cent_22_2014$theoretical_max,
+          deg.cent_22_2015$centralization/deg.cent_22_2015$theoretical_max,
+          deg.cent_22_2016$centralization/deg.cent_22_2016$theoretical_max,
+          deg.cent_22_2017$centralization/deg.cent_22_2017$theoretical_max
+  )
+  degree_centrality22 <- data.frame(year, cn)
+  remove(
+    deg.cent_22_1991,
+    deg.cent_22_1992,
+    deg.cent_22_1993,
+    deg.cent_22_1994,
+    deg.cent_22_1995,
+    deg.cent_22_1996,
+    deg.cent_22_1997,
+    deg.cent_22_1998,
+    deg.cent_22_1999,
+    deg.cent_22_2000,
+    deg.cent_22_2001,
+    deg.cent_22_2002,
+    deg.cent_22_2003,
+    deg.cent_22_2004,
+    deg.cent_22_2005,
+    deg.cent_22_2006,
+    deg.cent_22_2007,
+    deg.cent_22_2008,
+    deg.cent_22_2009,
+    deg.cent_22_2010,
+    deg.cent_22_2011,
+    deg.cent_22_2012,
+    deg.cent_22_2013,
+    deg.cent_22_2014,
+    deg.cent_22_2015,
+    deg.cent_22_2016,
+    deg.cent_22_2017)
+  #country 2: external 
+  cn <- c(deg.cent_21_1991$centralization/deg.cent_21_1991$theoretical_max, 
+          deg.cent_21_1992$centralization/deg.cent_21_1992$theoretical_max, 
+          deg.cent_21_1993$centralization/deg.cent_21_1993$theoretical_max, 
+          deg.cent_21_1994$centralization/deg.cent_21_1994$theoretical_max, 
+          deg.cent_21_1995$centralization/deg.cent_21_1995$theoretical_max,
+          deg.cent_21_1996$centralization/deg.cent_21_1996$theoretical_max,
+          deg.cent_21_1997$centralization/deg.cent_21_1997$theoretical_max,
+          deg.cent_21_1998$centralization/deg.cent_21_1998$theoretical_max,
+          deg.cent_21_1999$centralization/deg.cent_21_1999$theoretical_max,
+          deg.cent_21_2000$centralization/deg.cent_21_2000$theoretical_max,
+          deg.cent_21_2001$centralization/deg.cent_21_2001$theoretical_max,
+          deg.cent_21_2002$centralization/deg.cent_21_2002$theoretical_max,
+          deg.cent_21_2003$centralization/deg.cent_21_2003$theoretical_max,
+          deg.cent_21_2004$centralization/deg.cent_21_2004$theoretical_max,
+          deg.cent_21_2005$centralization/deg.cent_21_2005$theoretical_max,
+          deg.cent_21_2006$centralization/deg.cent_21_2006$theoretical_max,
+          deg.cent_21_2007$centralization/deg.cent_21_2007$theoretical_max,
+          deg.cent_21_2008$centralization/deg.cent_21_2008$theoretical_max,
+          deg.cent_21_2009$centralization/deg.cent_21_2009$theoretical_max,
+          deg.cent_21_2010$centralization/deg.cent_21_2010$theoretical_max,
+          deg.cent_21_2011$centralization/deg.cent_21_2011$theoretical_max,
+          deg.cent_21_2012$centralization/deg.cent_21_2012$theoretical_max,
+          deg.cent_21_2013$centralization/deg.cent_21_2013$theoretical_max,
+          deg.cent_21_2014$centralization/deg.cent_21_2014$theoretical_max,
+          deg.cent_21_2015$centralization/deg.cent_21_2015$theoretical_max,
+          deg.cent_21_2016$centralization/deg.cent_21_2016$theoretical_max,
+          deg.cent_21_2017$centralization/deg.cent_21_2017$theoretical_max
+  )
+  degree_centrality21 <- data.frame(year, cn)
+  remove(
+    deg.cent_21_1991,
+    deg.cent_21_1992,
+    deg.cent_21_1993,
+    deg.cent_21_1994,
+    deg.cent_21_1995,
+    deg.cent_21_1996,
+    deg.cent_21_1997,
+    deg.cent_21_1998,
+    deg.cent_21_1999,
+    deg.cent_21_2000,
+    deg.cent_21_2001,
+    deg.cent_21_2002,
+    deg.cent_21_2003,
+    deg.cent_21_2004,
+    deg.cent_21_2005,
+    deg.cent_21_2006,
+    deg.cent_21_2007,
+    deg.cent_21_2008,
+    deg.cent_21_2009,
+    deg.cent_21_2010,
+    deg.cent_21_2011,
+    deg.cent_21_2012,
+    deg.cent_21_2013,
+    deg.cent_21_2014,
+    deg.cent_21_2015,
+    deg.cent_21_2016,
+    deg.cent_21_2017)
+  remove(year, cn)
+  
+  #plot
+  plot(degree_centrality22,type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality / Theorectical max", 
+       main = "Degree centrality") 
+  lines(degree_centrality21, type = "o", col = "blue") 
+  lines(degree_centrality11, type = "o", col = "darkgreen")
+  lines(degree_centrality12, type = "o", col = "orange")
+  legend(1991, 1.5, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.6)
+  
+    
 
+# Newman-Garvin clustering ------------------------------------------------
 
+  
+  
+  
+
+  
+  
+  
 # Compute and plot eigenvector centrality ---------------------------------
-
 #This sections computes eigenvector centrality 
-#Currently it is only an example of the internal link intensity for country 1 in 1991 in the partial data set
-#To Do: expand for all years and combination of countries 
+
 
   #Country 1: Internal links 
   for (i in 1991:2017) {
