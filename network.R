@@ -65,8 +65,8 @@ cor(par_set$Intensity, par_set$Intensity_norm) == 1
 
 #This block creates a full data set that contains all the missing links 
 
-#This code creates a full (theoretical) set of dimensions 27*200*2*200*2
-comp_set <- expand.grid(1991:2017, 1:200, 1:2, 1:200, 1:2)
+#This code creates a full (theoretical) set of dimensions 27*189*2*189*2
+comp_set <- expand.grid(1991:2017, 1:189, 1:2, 1:189, 1:2)
 
 #This code compares the (theorectical) full set to the partial (real) data set
 #The result is a data frame that contains all the combinations of years and regions per country 
@@ -164,7 +164,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
 
 
 # Construct nework graphs / adjacency matrix per year, country, and ex/int links------------------------------------------------
-  nodes <- data.frame(ID=1:200)
+  nodes <- data.frame(ID=1:189)
   
   #Country 1: Internal links 
   for (i in 1991:2017) {
@@ -197,11 +197,11 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
     assign(n, graph_from_data_frame(links, nodes, directed = TRUE))
   }
-  remove(x,i,s,links, nodes, net, n)
+  remove(x,i,s,links, nodes, n)
   
 centralities <- proper_centralities(net_11_1991)
 # Compute and plot degree centrality (works) --------------------------------------
-  nodes <- data.frame(ID=1:200)
+  nodes <- data.frame(ID=1:189)
 
   #Country 1: Internal links 
   for (i in 1991:2017) {
@@ -628,7 +628,7 @@ centralities <- proper_centralities(net_11_1991)
 
 
 # Construct nework graphs / adjacency matrix per year, country (works)------------------------------------------------
-  nodes <- data.frame(ID=1:400)
+  nodes <- data.frame(ID=1:378)
   
   #Country 1:  
   for (i in 1991:2017) {
@@ -636,7 +636,7 @@ centralities <- proper_centralities(net_11_1991)
                Country_B = 1 or Country_B = 2)")
     x <- sqldf(s)
     x <- x %>%
-      mutate(Region_B = ifelse(Country_B==2, Region_B+200, Region_B))
+      mutate(Region_B = ifelse(Country_B==2, Region_B+189, Region_B))
     n <- paste("net_1_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
     assign(n, graph_from_data_frame(links, nodes, directed = TRUE))
@@ -647,7 +647,7 @@ centralities <- proper_centralities(net_11_1991)
                Country_B = 1 or Country_B = 2)")
     x <- sqldf(s)
     x <- x %>%
-      mutate(Region_B = ifelse(Country_B==1, Region_B+200, Region_B))
+      mutate(Region_B = ifelse(Country_B==1, Region_B+189, Region_B))
     n <- paste("net_2_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
     assign(n, graph_from_data_frame(links, nodes, directed = TRUE))
@@ -847,38 +847,49 @@ harm_cent11 <- data.frame()
       legend(1991, 140, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
              col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8) 
 
-      par(mfrow=c(4,7))
-      plot(harm.cent_11_1991, xlab="", ylab = "", main = "1991")
-      plot(harm.cent_11_1992, xlab="", ylab = "", main = "1992")
-      plot(harm.cent_11_1993, xlab="", ylab = "", main = "1993")
-      plot(harm.cent_11_1994, xlab="", ylab = "", main = "1994")
-      plot(harm.cent_11_1995, xlab="", ylab = "", main = "1995")
-      plot(harm.cent_11_1996, xlab="", ylab = "", main = "1996")
-      plot(harm.cent_11_1997, xlab="", ylab = "", main = "1997")
-      plot(harm.cent_11_1998, xlab="", ylab = "", main = "1998")
-      plot(harm.cent_11_1999, xlab="", ylab = "", main = "1999")
-      plot(harm.cent_11_2000, xlab="", ylab = "", main = "2000")
-      plot(harm.cent_11_2001, xlab="", ylab = "", main = "2001")
-      plot(harm.cent_11_2002, xlab="", ylab = "", main = "2002")
-      plot(harm.cent_11_2003, xlab="", ylab = "", main = "2003")
-      plot(harm.cent_11_2004, xlab="", ylab = "", main = "2004")
-      plot(harm.cent_11_2005, xlab="", ylab = "", main = "2005")
-      plot(harm.cent_11_2006, xlab="", ylab = "", main = "2006")
-      plot(harm.cent_11_2007, xlab="", ylab = "", main = "2007")
-      plot(harm.cent_11_2008, xlab="", ylab = "", main = "2008")
-      plot(harm.cent_11_2009, xlab="", ylab = "", main = "2009")
-      plot(harm.cent_11_2010, xlab="", ylab = "", main = "2010")
-      plot(harm.cent_11_2011, xlab="", ylab = "", main = "2011")
-      plot(harm.cent_11_2012, xlab="", ylab = "", main = "2012")
-      plot(harm.cent_11_2013, xlab="", ylab = "", main = "2013")
-      plot(harm.cent_11_2014, xlab="", ylab = "", main = "2014")
-      plot(harm.cent_11_2015, xlab="", ylab = "", main = "2015")
-      plot(harm.cent_11_2016, xlab="", ylab = "", main = "2016")
-      plot(harm.cent_11_2017, xlab="", ylab = "", main = "2017")
-     
-              
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_11_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_11_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_11_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_11_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_11_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_11_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 1: Internal links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)
+      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_12_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_12_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_12_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_12_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_12_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_12_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 1: External links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_22_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_22_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_22_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_22_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_22_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_22_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 2: Internal links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_21_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_21_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_21_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_21_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_21_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_21_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 2: External links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+      
+                    
 # Compute closeness centrality (not recommended)--------------------------------------
-  nodes <- data.frame(ID=1:200)
+  nodes <- data.frame(ID=1:189)
   
   #Country 1: Internal links 
   for (i in 1991:2017) {
