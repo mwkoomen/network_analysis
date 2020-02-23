@@ -603,7 +603,7 @@ centralities <- proper_centralities(net_11_1991)
   remove(year, cn)
 
 
-  # Plot Degree Centrality [integrated] (work-in-progress) --------------------------------------------------------------------
+  # Plot Degree Centrality (works) --------------------------------------------------------------------
 
   #plot  
   plot(degree_centrality22$year,degree_centrality22$cn, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality", 
@@ -627,6 +627,28 @@ centralities <- proper_centralities(net_11_1991)
 
 
 
+# Construct nework graphs / adjacency matrix per year, country------------------------------------------------
+  nodes <- data.frame(ID=1:400)
+  
+  #Country 1:  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and (
+               Country_B = 1 or Country_B = 2)")
+    x <- sqldf(s)
+    x$Region_B <- x %>%
+      mutate(Region_B = ifelse(Country_B==2, Region_B+200, Region_B))
+    n <- paste("net_1_", i, sep="")
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
+    assign(n, graph_from_data_frame(links, nodes, directed = TRUE))
+  }
+  #Country 2:   
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
+    n <- paste("net_2_", i, sep="")
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
+    assign(n, graph_from_data_frame(links, nodes, directed = TRUE))
+  }
+  remove(x,i,s,links, nodes, net, n)
   # Compile Degree Centrality [integrated] (work-in-progress) -----------------------------------------------
   #compile degree centrality  
   year <- c(1991:2017)
