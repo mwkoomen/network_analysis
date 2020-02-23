@@ -665,7 +665,8 @@ centralities <- proper_centralities(net_11_1991)
     n <- paste("net_2_", i, sep = "")
     x <- paste("dc_2_", i, sep="")
     assign(x, centr_degree(get(n), mode="total"))
-  }  
+  } 
+  remove(i, n, x)
   #compile degree centrality  
   year <- c(1991:2017)
   #country 1: 
@@ -726,8 +727,6 @@ centralities <- proper_centralities(net_11_1991)
     dc_1_2015,
     dc_1_2016,
     dc_1_2017)
-  
-  
   #country 2:  
   cn <- c(dc_2_1991$centralization,
           dc_2_1992$centralization,
@@ -792,26 +791,11 @@ centralities <- proper_centralities(net_11_1991)
   # Plot Degree Centrality [integrated] (work-in-progress) --------------------------------------------------------------------
   
   #plot  
-  plot(degree_centrality22$year,degree_centrality22$cn, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality", 
-       main = "Degree centrality", ylim = c(0.05,0.25)) 
-  lines(degree_centrality21$year, degree_centrality21$cn, type = "o", col = "blue") 
-  lines(degree_centrality11$year, degree_centrality11$cn, type = "o", col = "darkgreen")
-  lines(degree_centrality12$year, degree_centrality12$cn, type = "o", col = "orange")
-  legend(2010, 0.43, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-         col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)  
-  
-  #plot max 
-  plot(degree_centrality22_max$year,degree_centrality22_max$cn, type = "o",col = "red", xlab = "Year", 
-       ylab = "Degree Centrality / Theorectical max", 
-       main = "Degree centrality", ylim=c(0.000004,0.000012)) 
-  lines(degree_centrality21_max$year, degree_centrality21_max$cn, type = "o", col = "blue") 
-  lines(degree_centrality11_max$year, degree_centrality11_max$cn, type = "o", col = "darkgreen")
-  lines(degree_centrality12_max$year, degree_centrality12_max$cn, type = "o", col = "orange")
-  legend(2010, 0.000012, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-         col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)  
-  
-  
-  
+  plot(dc_int2, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality", 
+       main = "Degree centrality (integrated)", ylim = c(0.05,0.25)) 
+  lines(dc_int1, type = "o", col = "blue") 
+  legend(1991, 0.25, legend=c("C2:Internal + External", "C1:Internal + External"),
+         col=c("red", "blue"), lty=1:2, cex=0.8)  
   
   
 # Compute Harmonic Centrality (works) ---------------------------------------------
