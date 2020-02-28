@@ -1511,14 +1511,58 @@ year <- c(1991:2017)
   legend(2010, 0.000012, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)  
   
-# Newman-Garvin clustering ------------------------------------------------
+# Newman-Garvin clustering (not very usefull)------------------------------------------------
+par(old.par)
+  ceb <- cluster_edge_betweenness(net_11_1991)
+  #dendPlot(ceb, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb)
+  #membership(ceb)
 
+  ceb2 <- cluster_edge_betweenness(net_11_2017)
+  #dendPlot(ceb2, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb2)
+  #membership(ceb2)
+  
+  ceb3 <- cluster_edge_betweenness(net_12_1991)
+  #dendPlot(ceb, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb)
+  #membership(ceb)
+  
+  ceb4 <- cluster_edge_betweenness(net_12_2017)
+  #dendPlot(ceb2, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb2)
+  #membership(ceb2)
+  
+  ceb5 <- cluster_edge_betweenness(net_22_1991)
+  #dendPlot(ceb, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb)
+  #membership(ceb)
+  
+  ceb6 <- cluster_edge_betweenness(net_22_2017)
+  #dendPlot(ceb2, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb2)
+  #membership(ceb2)
+  
+  ceb3 <- cluster_edge_betweenness(net_12_1991)
+  #dendPlot(ceb, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb)
+  #membership(ceb)
+  
+  ceb4 <- cluster_edge_betweenness(net_12_2017)
+  #dendPlot(ceb2, mode="hclust")
+  #plot(ceb, net_11_1991)
+  modularity(ceb2)
+  #membership(ceb2)
   
   
-  
-
-  
-  
+    
   
 # Compute and plot eigenvector centrality (needs revision)---------------------------------
   #Country 1: Internal links 
