@@ -889,7 +889,7 @@ remove(x,i,s,links, nodes, net, n)
     dc_2_2016,
     dc_2_2017)
 
-  # Plot Degree Centrality [integrated] (work-in-progress) --------------------------------------------------------------------
+  # Plot Degree Centrality [integrated] (works) --------------------------------------------------------------------
   
   #plot  
   plot(dc_int2, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality", 
