@@ -111,7 +111,6 @@ max(test_unique$rownumb)==1
 #This code removes the temporary data frames
 rm("comp_set", "dif", "test_unique")
 
-
 # Partial set link intensity plot -----------------------------------------
 
 #This code block will plot the link intesity per country (internal/external) per year using the partial 
@@ -138,7 +137,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   lines(pc1c1, type = "o", col = "darkgreen")
   lines(pc1c2, type = "o", col = "orange")
   legend(1991, 45000, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-         col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)
+         col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
 
   
 # Full set link intensity plot --------------------------------------------
@@ -167,6 +166,48 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   lines(fc2c1, type = "o", col = "blue")
   legend(1991, 8500, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
+# Count zeros --------------------------------------------
+  
+  zc1c1 <- full_set %>%
+    filter(Country_A==1, Country_B==1 & Intensity==0) %>%
+    group_by(Year) %>%
+    count(Intensity)
+  zc1c1$n <- round(zc1c1$n/189)
+  zc1c2 <- full_set %>%
+    filter(Country_A==1, Country_B==2 & Intensity==0) %>%
+    group_by(Year) %>%
+    count(Intensity)
+  zc1c2$n <- round(zc1c2$n/189)
+  zc2c2 <- full_set %>%
+    filter(Country_A==2, Country_B==2 & Intensity==0) %>%
+    group_by(Year) %>%
+    count(Intensity)
+  zc2c2$n <- round(zc2c2$n/189)
+  zc2c1 <- full_set %>%
+    filter(Country_A==2, Country_B==1 & Intensity==0) %>%
+    group_by(Year) %>%
+    count(Intensity)
+  zc2c1$n <- round(zc2c1$n/189)
+  zc1c1$link <- "Country 1: Internal"
+  zc1c2$link <- "Country 1: External"
+  zc2c2$link <- "Country 2: Internal"
+  zc2c1$link <- "Country 2: External"
+  zero.vertices <- rbind(zc1c1, zc1c2, zc2c2, zc2c1)  
+  remove(zc1c1, zc1c2, zc2c2, zc2c1)
+  
+  p <- ggplot(zero.vertices, aes(Year, n))
+  p +  ggtitle("# vertices with no edges") + 
+    theme(plot.title = element_text(hjust = 0.5)) +
+    geom_smooth(aes(colour = factor(link)))
+  
+    
+  # plot(zc1c1$Year, zc1c1$n, type = "o", col = "darkgreen", xlab = "Year", ylab = "# vertices", 
+  #      main = "# vertices with no edges", ylim=c(140,189)) 
+  # lines(zc1c2$Year, zc1c2$n, type = "o", col = "orange") 
+  # lines(zc2c2$Year, zc2c2$n, type = "o", col = "red")
+  # lines(zc2c1$Year, zc2c1$n, type = "o", col = "blue")
+  # legend(1991,155, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
+  #        col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
 
 
 # Construct nework graphs / adjacency matrix per year, country, and ex/int links------------------------------------------------
