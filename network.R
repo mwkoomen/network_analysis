@@ -28,6 +28,7 @@ library(CINNA)
 library(ggplot2)
 library(sna)
 library(qgraph)
+library(data.table)
 
 #!!!!! Run seperately the first time: this might prompt you with a quesiton if you want to load 
 #external data in a temporary cache or create a seperate folder. Either is fine, 
@@ -38,7 +39,6 @@ library(RCurl)
 
 #Code that saves the default settings of the graph engine
 old.par <- par(no.readonly = TRUE)
-
 
 # Load data ---------------------------------------------------------------
 
@@ -210,7 +210,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   #        col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
 
 
-# Construct nework graphs / adjacency matrix per year, country, and ex/int links------------------------------------------------
+# Construct adjacency matrix per year, country, links [directed]------------------------------------------------
   nodes <- data.frame(ID=1:189)
   
   #Country 1: Internal links 
@@ -219,7 +219,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
     x <- sqldf(s)
     n <- paste("net_11_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
-    assign(n, graph_from_data_frame(links, nodes, directed = FALSE))
+    assign(n, graph_from_data_frame(links, nodes, directed = T))
   }
   #Country 1: External links  
   for (i in 1991:2017) {
@@ -227,14 +227,14 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
     x <- sqldf(s)
     n <- paste("net_12_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
-    assign(n, graph_from_data_frame(links, nodes, directed = FALSE))
+    assign(n, graph_from_data_frame(links, nodes, directed = T))
   }
   #Country 2: Internal links  
   for (i in 1991:2017) {
     s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
     n <- paste("net_22_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
-    assign(n, graph_from_data_frame(links, nodes, directed = FALSE))
+    assign(n, graph_from_data_frame(links, nodes, directed = T))
   }
   #Country 2: External links  
   for (i in 1991:2017) {
@@ -242,7 +242,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
     x <- sqldf(s)
     n <- paste("net_21_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
-    assign(n, graph_from_data_frame(links, nodes, directed = FALSE))
+    assign(n, graph_from_data_frame(links, nodes, directed = T))
   }
   remove(x,i,s,links, nodes, n)
 
@@ -251,6 +251,48 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   plot(delete.vertices(simplify(net_12_2017), degree(net_12_2017)==0), 
        layout=layout_with_fr, vertex.label = NA, vertex.size=6)  
 
+# Construct adjacency matrix per year, country, links [undirected]------------------------------------------------
+  nodes <- data.frame(ID=1:189)
+  
+  #Country 1: Internal links 
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
+    x <- sqldf(s)
+    n <- paste("net_11_", i, sep="")
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
+    assign(n, graph_from_data_frame(links, nodes, directed = F))
+  }
+  #Country 1: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 2")
+    x <- sqldf(s)
+    n <- paste("net_12_", i, sep="")
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
+    assign(n, graph_from_data_frame(links, nodes, directed = F))
+  }
+  #Country 2: Internal links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
+    n <- paste("net_22_", i, sep="")
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
+    assign(n, graph_from_data_frame(links, nodes, directed = F))
+  }
+  #Country 2: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 1")
+    x <- sqldf(s)
+    n <- paste("net_21_", i, sep="")
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
+    assign(n, graph_from_data_frame(links, nodes, directed = F))
+  }
+  remove(x,i,s,links, nodes, n)
+  
+  #example plot with no loops or unconnected regions
+  par(old.par)
+  plot(delete.vertices(simplify(net_12_2017), degree(net_12_2017)==0), 
+       layout=layout_with_fr, vertex.label = NA, vertex.size=6)  
+  
+  
 # Degree distibution plots [not normalized] [unweighted] (works) ------------------------------------------------
 
 #C1 external links  
@@ -307,11 +349,12 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   deg.dist22_6 <- degree_distribution(net_22_2017, cumulative=T, mode="all")
   
 #plot country 1  
-  par(mfrow=c(2,3), oma = c(0, 1, 2, 0))
+  par(mfrow=c(2,3), oma = c(0,2,2,0))
   plot(x=0:max(deg11_1), y=1-deg.dist11_1, cex=1.2, col=rgb(0,0.4,0.8,alpha=0.4), ylim=c(0,1), xlim=c(0,130), 
         xlab="1991", ylab="Cumulative Frequency", type = "h")
   lines(x=0:max(deg12_1), y=1-deg.dist12_1, cex=1.2, col=rgb(1,0.2,0.2, alpha=0.4), ylim=c(0,1), xlim=c(0,130), 
         type="h")
+  legend(1,200,legend=c("Internal", "External"),col=c("blue", "red"), lty=1, cex=0.9, bty="n") 
   plot(x=0:max(deg11_2), y=1-deg.dist11_2, cex=1.2, col=rgb(0,0.4,0.8,alpha=0.4), ylim=c(0,1), xlim=c(0,130), 
         xlab="1996", ylab="", type = "h")
   lines(x=0:max(deg12_2), y=1-deg.dist12_2, cex=1.2, col=rgb(1,0.2,0.2, alpha=0.4), ylim=c(0,1), xlim=c(0,130), 
@@ -335,7 +378,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   mtext("Country 1: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
 
   #plot country 2  
-  par(mfrow=c(2,3), oma = c(2, 1, 2, 0))
+  par(mfrow=c(2,3), oma = c(0,2,2,0))
   plot( x=0:max(deg22_1), y=1-deg.dist22_1, cex=1.2, col=rgb(0,0.4,0.8,alpha=0.4), ylim=c(0,1), xlim=c(0,130), 
         xlab="1991", ylab="Cumulative Frequency", type = "h")
   lines( x=0:max(deg21_1), y=1-deg.dist21_1, cex=1.2, col=rgb(1,0.2,0.2, alpha=0.4), ylim=c(0,1), xlim=c(0,130), 
@@ -947,7 +990,7 @@ harm_cent11 <- data.frame()
   n <- paste("net_11_", i, sep="")
   x <- get(n)
   h <- paste("harm.cent_11_", i, sep="")
-  assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = NULL))
+  assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
   d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
   harm_cent11 <- rbind(harm_cent11, d)
 }
@@ -957,7 +1000,7 @@ harm_cent11 <- data.frame()
     n <- paste("net_12_", i, sep="")
     x <- get(n)
     h <- paste("harm.cent_12_", i, sep="")
-    assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = NULL))
+    assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
     d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
     harm_cent12 <- rbind(harm_cent12, d)
   }
@@ -967,7 +1010,7 @@ harm_cent11 <- data.frame()
       n <- paste("net_22_", i, sep="")
       x <- get(n)
       h <- paste("harm.cent_22_", i, sep="")
-      assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = NULL))
+      assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
       d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
       harm_cent22 <- rbind(harm_cent22, d)
     }
@@ -977,7 +1020,7 @@ harm_cent11 <- data.frame()
         n <- paste("net_21_", i, sep="")
         x <- get(n)
         h <- paste("harm.cent_21_", i, sep="")
-        assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = NULL))
+        assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent21 <- rbind(harm_cent21, d)
       }    
@@ -1031,14 +1074,14 @@ harm_cent11 <- data.frame()
             outer=TRUE, cex=1, font=2)      
       
                     
-# Compute Harmonic Centrality [weighted] (does not work) ---------------------------------------------
+# Compute Harmonic Centrality [weighted] (works) ---------------------------------------------
       #C1: internal
       harm_cent11 <- data.frame()
       for (i in 1991:2017){
         n <- paste("net_11_", i, sep="")
         x <- get(n)
         h <- paste("harm.cent_11_", i, sep="")
-        assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = "weight"))
+        assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent11 <- rbind(harm_cent11, d)
       }
@@ -1048,7 +1091,7 @@ harm_cent11 <- data.frame()
         n <- paste("net_12_", i, sep="")
         x <- get(n)
         h <- paste("harm.cent_12_", i, sep="")
-        assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = NULL))
+        assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent12 <- rbind(harm_cent12, d)
       }
@@ -1058,7 +1101,7 @@ harm_cent11 <- data.frame()
         n <- paste("net_22_", i, sep="")
         x <- get(n)
         h <- paste("harm.cent_22_", i, sep="")
-        assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = NULL))
+        assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent22 <- rbind(harm_cent22, d)
       }
@@ -1068,10 +1111,21 @@ harm_cent11 <- data.frame()
         n <- paste("net_21_", i, sep="")
         x <- get(n)
         h <- paste("harm.cent_21_", i, sep="")
-        assign(h, harmonic_centrality(x, vids=V(x), mode = "all", weights = NULL))
+        assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent21 <- rbind(harm_cent21, d)
-      }    
+      } 
+      harm_cent11$link <- "Country 1: Internal"
+      harm_cent12$link <- "Country 1: External"      
+      harm_cent22$link <- "Country 2: Internal"
+      harm_cent21$link <- "Country 2: External"
+      harm_cent <- rbind(harm_cent11, harm_cent12, harm_cent22, harm_cent21)
+      
+      p <- ggplot(harm_cent, aes(year, harmonic_centrality))
+      p +  ggtitle("Harmonic Centrality [weigted]") + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        geom_point(aes(colour = factor(link)))
+      
       par(old.par)
       plot(harm_cent22, type = "o",col = "red", xlab = "Year", ylab = "Harmonic Centrality (Mean)", 
            main = "Harmonic centrality (Mean)", ylim=c(0,30)) 
@@ -1080,7 +1134,144 @@ harm_cent11 <- data.frame()
       lines(harm_cent12, type = "o", col = "orange")
       legend(1991, 30, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
              col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8) 
+
+#density plots             
+      par(mfrow=c(2,2), oma=c(0,0,2,0))
+      plot(density(harm.cent_11_1991), xlab="", ylab="density", main="Country 1: Internal links", cex=0.8, 
+           col="red", xlim = c(0,60),ylim=c(0,0.4)) 
+      polygon(density(harm.cent_11_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_11_2001), col="blue")
+      polygon(density(harm.cent_11_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_11_2017), col="green")
+      polygon(density(harm.cent_11_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
       
+      plot(density(harm.cent_12_1991), xlab="", ylab="density", main="Country 1: External links", cex=0.8, 
+           col="red", xlim = c(0,60),ylim=c(0,0.4)) 
+      polygon(density(harm.cent_12_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_12_2001), col="blue")
+      polygon(density(harm.cent_12_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_12_2017), col="green")
+      polygon(density(harm.cent_12_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
+      
+      plot(density(harm.cent_22_1991), xlab="", ylab="density", main="Country 2: Internal links", cex=0.8, 
+           col="red", xlim = c(0,60),ylim=c(0,0.4)) 
+      polygon(density(harm.cent_22_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_22_2001), col="blue")
+      polygon(density(harm.cent_22_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_22_2017), col="green")
+      polygon(density(harm.cent_22_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
+      
+      plot(density(harm.cent_21_1991), xlab="", ylab="density", main="Country 2: External links", cex=0.8, 
+           col="red", xlim = c(0,60),ylim=c(0,0.4)) 
+      polygon(density(harm.cent_21_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_21_2001), col="blue")
+      polygon(density(harm.cent_21_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
+      lines(density(harm.cent_21_2017), col="green")
+      polygon(density(harm.cent_21_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
+   
+      mtext("Harmonic Centrality [Weighted]", 
+            outer=TRUE, cex=1, font=2)
+
+#number plot 
+      #country 1
+      t1a <- sort(harm.cent_11_1991)
+      t1a <- data.frame(num=1:189, harmonic_centrality=t1a)
+      t1b <- sort(harm.cent_12_1991)
+      t1b <- data.frame(num=1:189, harmonic_centrality=t1b)      
+      t2a <- sort(harm.cent_11_1996)
+      t2a <- data.frame(num=1:189, harmonic_centrality=t2a)
+      t2b <- sort(harm.cent_12_1996)
+      t2b <- data.frame(num=1:189, harmonic_centrality=t2b)      
+      t3a <- sort(harm.cent_11_2001)
+      t3a <- data.frame(num=1:189, harmonic_centrality=t3a)
+      t3b <- sort(harm.cent_12_2001)
+      t3b <- data.frame(num=1:189, harmonic_centrality=t3b)      
+      t4a <- sort(harm.cent_11_2006)
+      t4a <- data.frame(num=1:189, harmonic_centrality=t4a)
+      t4b <- sort(harm.cent_12_2006)
+      t4b <- data.frame(num=1:189, harmonic_centrality=t4b)      
+      t5a <- sort(harm.cent_11_2011)
+      t5a <- data.frame(num=1:189, harmonic_centrality=t5a)
+      t5b <- sort(harm.cent_12_2011)
+      t5b <- data.frame(num=1:189, harmonic_centrality=t5b)      
+      t6a <- sort(harm.cent_11_2017)
+      t6a <- data.frame(num=1:189, harmonic_centrality=t6a)
+      t6b <- sort(harm.cent_12_2017)
+      t6b <- data.frame(num=1:189, harmonic_centrality=t6b)      
+      
+      par(mfrow=c(2,3), oma = c(0,2,2,0))
+      plot(t1a, ylim=c(0,210), xlab="1991", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t1b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      legend(1,200,legend=c("Internal", "External"),col=c("blue", "red"), lty=1, cex=0.9, bty="n") 
+      
+      plot(t2a, ylim=c(0,210), xlab="1996", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t2b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t3a, ylim=c(0,210), xlab="2001", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t3b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t4a, ylim=c(0,210), xlab="2006", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t4b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t5a, ylim=c(0,210), xlab="2011", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t5b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t6a, ylim=c(0,210), xlab="2017", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t6b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      mtext("Country 1: Harmonic Centrality [weighted] per vertex", 
+            outer=TRUE, cex=0.9, font=2)
+      
+      #country 2
+      t1a <- sort(harm.cent_21_1991)
+      t1a <- data.frame(num=1:189, harmonic_centrality=t1a)
+      t1b <- sort(harm.cent_22_1991)
+      t1b <- data.frame(num=1:189, harmonic_centrality=t1b)      
+      t2a <- sort(harm.cent_21_1996)
+      t2a <- data.frame(num=1:189, harmonic_centrality=t2a)
+      t2b <- sort(harm.cent_22_1996)
+      t2b <- data.frame(num=1:189, harmonic_centrality=t2b)      
+      t3a <- sort(harm.cent_21_2001)
+      t3a <- data.frame(num=1:189, harmonic_centrality=t3a)
+      t3b <- sort(harm.cent_22_2001)
+      t3b <- data.frame(num=1:189, harmonic_centrality=t3b)      
+      t4a <- sort(harm.cent_21_2006)
+      t4a <- data.frame(num=1:189, harmonic_centrality=t4a)
+      t4b <- sort(harm.cent_22_2006)
+      t4b <- data.frame(num=1:189, harmonic_centrality=t4b)      
+      t5a <- sort(harm.cent_21_2011)
+      t5a <- data.frame(num=1:189, harmonic_centrality=t5a)
+      t5b <- sort(harm.cent_22_2011)
+      t5b <- data.frame(num=1:189, harmonic_centrality=t5b)      
+      t6a <- sort(harm.cent_21_2017)
+      t6a <- data.frame(num=1:189, harmonic_centrality=t6a)
+      t6b <- sort(harm.cent_22_2017)
+      t6b <- data.frame(num=1:189, harmonic_centrality=t6b)      
+      
+      par(mfrow=c(2,3), oma = c(0, 2, 2, 0))
+      plot(t1a, ylim=c(0,100), xlab="1991", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t1b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      legend(1,100,legend=c("Internal", "External"),col=c("blue", "red"), lty=1, cex=0.9, bty="n") 
+      
+      plot(t2a, ylim=c(0,100), xlab="1996", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t2b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t3a, ylim=c(0,100), xlab="2001", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t3b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t4a, ylim=c(0,100), xlab="2006", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t4b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t5a, ylim=c(0,100), xlab="2011", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t5b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t6a, ylim=c(0,100), xlab="2017", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t6b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      mtext("Country 2: Harmonic Centrality [weighted] per vertex", 
+            outer=TRUE, cex=0.9, font=2)
+      
+      
+
+#histogram      
       par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
       hist(harm.cent_11_1991, xlab="", ylab="", main="1991", col="darkred")
       hist(harm.cent_11_1996, xlab="", ylab="", main="1996", col="darkred")
@@ -1089,8 +1280,9 @@ harm_cent11 <- data.frame()
       hist(harm.cent_11_2011, xlab="", ylab="", main="2011", col="darkred")
       hist(harm.cent_11_2017, xlab="", ylab="", main="2017", col="darkred")
       mtext("Country 1: Internal links (Harmonic centrality)", 
-            outer=TRUE, cex=1, font=2)
+            outer=TRUE, cex=1, font=2)      
       
+            
       par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
       hist(harm.cent_12_1991, xlab="", ylab="", main="1991", col="darkred")
       hist(harm.cent_12_1996, xlab="", ylab="", main="1996", col="darkred")
