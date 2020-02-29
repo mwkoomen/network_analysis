@@ -166,7 +166,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   lines(fc2c2, type = "o", col = "red")
   lines(fc2c1, type = "o", col = "blue")
   legend(1991, 8500, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-         col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)
+         col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
 
 
 # Construct nework graphs / adjacency matrix per year, country, and ex/int links------------------------------------------------
@@ -210,7 +210,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   plot(delete.vertices(simplify(net_12_2017), degree(net_12_2017)==0), 
        layout=layout_with_fr, vertex.label = NA, vertex.size=6)  
 
-# Degree distibution plots [not normalized] (works) ------------------------------------------------
+# Degree distibution plots [not normalized] [unweighted] (works) ------------------------------------------------
 
 #C1 external links  
   deg12_1 <- degree(net_12_1991, mode="all")
@@ -322,7 +322,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   mtext("Country 2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
   
 centralities <- proper_centralities(net_11_1991)
-# Compute and plot degree centrality [not normalized] (works) --------------------------------------
+# Compute and plot degree centrality [not normalized] [unweighted] (works) --------------------------------------
 nodes <- data.frame(ID=1:189)
 
 #Country 1: Internal links 
@@ -363,7 +363,7 @@ for (i in 1991:2017) {
 }
 remove(x,i,s,links, nodes, net, n)
 
-# Compute and plot degree centrality [normalized] (works) --------------------------------------
+# Compute and plot degree centrality [normalized] [unweighted] (works) --------------------------------------
   nodes <- data.frame(ID=1:189)
 
   #Country 1: Internal links 
@@ -371,40 +371,40 @@ remove(x,i,s,links, nodes, net, n)
     s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
     x <- sqldf(s)
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    net <- graph_from_data_frame(links, nodes, directed = F)
     n <- paste("deg.cent_11_", i, sep="")
-    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+    assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
   }
   #Country 1: External links  
   for (i in 1991:2017) {
     s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 2")
     x <- sqldf(s)
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    net <- graph_from_data_frame(links, nodes, directed = F)
     n <- paste("deg.cent_12_", i, sep="")
-    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+    assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
   }
   #Country 2: Internal links  
   for (i in 1991:2017) {
     s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
     x <- sqldf(s)
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    net <- graph_from_data_frame(links, nodes, directed = F)
     n <- paste("deg.cent_22_", i, sep="")
-    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+    assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
   }
   #Country 2: External links  
   for (i in 1991:2017) {
     s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 1")
     x <- sqldf(s)
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    net <- graph_from_data_frame(links, nodes, directed = F)
     n <- paste("deg.cent_21_", i, sep="")
-    assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = TRUE))
+    assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
   }
   remove(x,i,s,links, nodes, net, n)
 
-  # Compile Degree Centrality [normalized] (works) -----------------------------------------------
+  # Compile Degree Centrality (works) -----------------------------------------------
   #compile degree centrality  
   year <- c(1991:2017)
   #country 1: internal
@@ -529,6 +529,7 @@ remove(x,i,s,links, nodes, net, n)
   degree_centrality21 <- data.frame(year, cn)
   remove(year, cn)
 
+
   # Plot Degree Centrality [not normalized] (works) --------------------------------------------------------------------
   par(old.par)
   plot(degree_centrality22$year,degree_centrality22$cn, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality (Mean)", 
@@ -544,13 +545,189 @@ remove(x,i,s,links, nodes, net, n)
   #plot  
   par(old.par)
   plot(degree_centrality22$year,degree_centrality22$cn, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality (Mean)", 
-       main = "Degree centrality", ylim = c(0.05,0.25)) 
+       main = "Degree centrality", ylim = c(0.15,0.45)) 
   lines(degree_centrality21$year, degree_centrality21$cn, type = "o", col = "blue") 
   lines(degree_centrality11$year, degree_centrality11$cn, type = "o", col = "darkgreen")
   lines(degree_centrality12$year, degree_centrality12$cn, type = "o", col = "orange")
   legend(2008, 0.25, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)  
  
+# Compute and plot degree centrality [not normalized] [weighted] (works) --------------------------------------
+  nodes <- data.frame(ID=1:189)
+  
+  #Country 1: Internal links 
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_11_", i, sep="")
+    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+  }
+  #Country 1: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 2")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_12_", i, sep="")
+    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+  }
+  #Country 2: Internal links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_22_", i, sep="")
+    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+  }
+  #Country 2: External links  
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 1")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    n <- paste("deg.cent_21_", i, sep="")
+    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+  }
+  remove(x,i,s,links, nodes, net, n)
+  
+  
+  # Compile Degree Centrality [weighted] (works) -----------------------------------------------
+  year <- c(1991:2017)
+  #country 1: internal
+  cn <- c(mean(deg.cent_11_1991),
+          mean(deg.cent_11_1992),
+          mean(deg.cent_11_1993),
+          mean(deg.cent_11_1994),
+          mean(deg.cent_11_1995),
+          mean(deg.cent_11_1996),
+          mean(deg.cent_11_1997),
+          mean(deg.cent_11_1998),
+          mean(deg.cent_11_1999),
+          mean(deg.cent_11_2000),
+          mean(deg.cent_11_2001),
+          mean(deg.cent_11_2002),
+          mean(deg.cent_11_2003),
+          mean(deg.cent_11_2004),
+          mean(deg.cent_11_2005),
+          mean(deg.cent_11_2006),
+          mean(deg.cent_11_2007),
+          mean(deg.cent_11_2008),
+          mean(deg.cent_11_2009),
+          mean(deg.cent_11_2010),
+          mean(deg.cent_11_2011),
+          mean(deg.cent_11_2012),
+          mean(deg.cent_11_2013),
+          mean(deg.cent_11_2014),
+          mean(deg.cent_11_2015),
+          mean(deg.cent_11_2016),
+          mean(deg.cent_11_2017)
+  )
+  degree_centrality11 <- data.frame(year, cn)
+  #country 1: external
+  cn <- c(mean(deg.cent_12_1991),
+          mean(deg.cent_12_1992),
+          mean(deg.cent_12_1993),
+          mean(deg.cent_12_1994),
+          mean(deg.cent_12_1995),
+          mean(deg.cent_12_1996),
+          mean(deg.cent_12_1997),
+          mean(deg.cent_12_1998),
+          mean(deg.cent_12_1999),
+          mean(deg.cent_12_2000),
+          mean(deg.cent_12_2001),
+          mean(deg.cent_12_2002),
+          mean(deg.cent_12_2003),
+          mean(deg.cent_12_2004),
+          mean(deg.cent_12_2005),
+          mean(deg.cent_12_2006),
+          mean(deg.cent_12_2007),
+          mean(deg.cent_12_2008),
+          mean(deg.cent_12_2009),
+          mean(deg.cent_12_2010),
+          mean(deg.cent_12_2011),
+          mean(deg.cent_12_2012),
+          mean(deg.cent_12_2013),
+          mean(deg.cent_12_2014),
+          mean(deg.cent_12_2015),
+          mean(deg.cent_12_2016),
+          mean(deg.cent_12_2017)
+  )
+  degree_centrality12 <- data.frame(year, cn)
+  #country 2: internal
+  cn <- c(mean(deg.cent_22_1991),
+          mean(deg.cent_22_1992),
+          mean(deg.cent_22_1993),
+          mean(deg.cent_22_1994),
+          mean(deg.cent_22_1995),
+          mean(deg.cent_22_1996),
+          mean(deg.cent_22_1997),
+          mean(deg.cent_22_1998),
+          mean(deg.cent_22_1999),
+          mean(deg.cent_22_2000),
+          mean(deg.cent_22_2001),
+          mean(deg.cent_22_2002),
+          mean(deg.cent_22_2003),
+          mean(deg.cent_22_2004),
+          mean(deg.cent_22_2005),
+          mean(deg.cent_22_2006),
+          mean(deg.cent_22_2007),
+          mean(deg.cent_22_2008),
+          mean(deg.cent_22_2009),
+          mean(deg.cent_22_2010),
+          mean(deg.cent_22_2011),
+          mean(deg.cent_22_2012),
+          mean(deg.cent_22_2013),
+          mean(deg.cent_22_2014),
+          mean(deg.cent_22_2015),
+          mean(deg.cent_22_2016),
+          mean(deg.cent_22_2017)
+  )
+  degree_centrality22 <- data.frame(year, cn)
+  #country 2: external 
+  cn <- c(mean(deg.cent_21_1991),
+          mean(deg.cent_21_1992),
+          mean(deg.cent_21_1993),
+          mean(deg.cent_21_1994),
+          mean(deg.cent_21_1995),
+          mean(deg.cent_21_1996),
+          mean(deg.cent_21_1997),
+          mean(deg.cent_21_1998),
+          mean(deg.cent_21_1999),
+          mean(deg.cent_21_2000),
+          mean(deg.cent_21_2001),
+          mean(deg.cent_21_2002),
+          mean(deg.cent_21_2003),
+          mean(deg.cent_21_2004),
+          mean(deg.cent_21_2005),
+          mean(deg.cent_21_2006),
+          mean(deg.cent_21_2007),
+          mean(deg.cent_21_2008),
+          mean(deg.cent_21_2009),
+          mean(deg.cent_21_2010),
+          mean(deg.cent_21_2011),
+          mean(deg.cent_21_2012),
+          mean(deg.cent_21_2013),
+          mean(deg.cent_21_2014),
+          mean(deg.cent_21_2015),
+          mean(deg.cent_21_2016),
+          mean(deg.cent_21_2017)
+  )
+  degree_centrality21 <- data.frame(year, cn)
+  remove(year, cn)
+  
+  # Plot Degree Centrality [non normalized] [weighted] (works) --------------------------------------------------------------------
+  par(old.par)
+  plot(degree_centrality22$year,degree_centrality22$cn, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality (Mean)", 
+       main = "Degree centrality [weighted]", ylim=c(0,0.12)) 
+  lines(degree_centrality21$year, degree_centrality21$cn, type = "o", col = "blue") 
+  lines(degree_centrality11$year, degree_centrality11$cn, type = "o", col = "darkgreen")
+  lines(degree_centrality12$year, degree_centrality12$cn, type = "o", col = "orange")
+  legend(1991, 0.12, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
+         col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")  
+  
 # Construct nework graphs / adjacency matrix per year, country (works)------------------------------------------------
   nodes <- data.frame(ID=1:378)
   
