@@ -44,7 +44,6 @@ old.par <- par(no.readonly = TRUE)
 
 #clear workspace and reset graph engine 
 rm(list=setdiff(ls(), "old.par"))
-par(old.par)
 
 #This imports the Rdata file from github 
 #The data is stored as the partial set of data, i.e. null connections are missing
@@ -112,26 +111,45 @@ max(test_unique$rownumb)==1
 rm("comp_set", "dif", "test_unique")
 
 # Collapse duplicate rows -------------------------------------------------
-full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
-full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
+par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
+par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
+
+par_set <- par_set %>%
+  mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
+  mutate(border=ifelse(Country_A!=Country_B, 1, 0))
+
+#test double links
+
+raw_rowcount <- sqldf("select count(*) from par_set where Year=1991 and Country_A=1 and border=0 and autolink=0")
+test1 <- sqldf("
+                select edge1 from par_set where Year=1991 and Country_A=1 and border=0 and autolink=0
+                except 
+                select edge2 from par_set where Year=1991 and Country_A=1 and border=0 and autolink=0
+              ")
+
 
 c11a <- sqldf("
              select Year, Region_A as Region1, 
               Intensity, Intensity_norm, edge1 as edge
-             from full_set 
+             from par_set 
              where Country_A = 1 and 
              Country_B = 1
              ")
 c11b <- sqldf("select Year, Region_B as Region1, 
-                Intensity, Intensity_norm, edge2 as edge, edge1 as drop
-               from full_set 
+                Intensity, Intensity_norm, edge2 as edge, edge1 as d
+                from par_set 
                where Country_A = 1 and 
                Country_B = 1 
                 ")
 c11 <- sqldf("
-             select * from c11 
-             group by Year, Region1, Intensity, Intensity_norm, edge
+             select a.Year, a.Region1, null as Region2, 1 as country, 0 as border, 
+              a.Intensity, b.Intensity, a.Intensity + b.Intensity, a.edge, b.edge, b.d
+             from c11a a inner join c11b b 
+             on a.edge = b.edge and a.edge <> b.d
+             except 
+             
              ")
+
 
 c12 <- sqldf("
             select * from full_set 
