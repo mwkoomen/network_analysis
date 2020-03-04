@@ -1,6 +1,6 @@
-
-#NETWORK DATA
-
+####################################################
+#NETWORK DATA ANALYSIS
+####################################################
 
 # Initialize --------------------------------------------------------------
 
@@ -110,6 +110,45 @@ max(test_unique$rownumb)==1
 
 #This code removes the temporary data frames
 rm("comp_set", "dif", "test_unique")
+
+# Collapse duplicate rows -------------------------------------------------
+full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
+full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
+
+c11a <- sqldf("
+             select Year, Region_A as Region1, 
+              Intensity, Intensity_norm, edge1 as edge
+             from full_set 
+             where Country_A = 1 and 
+             Country_B = 1
+             ")
+c11b <- sqldf("select Year, Region_B as Region1, 
+                Intensity, Intensity_norm, edge2 as edge, edge1 as drop
+               from full_set 
+               where Country_A = 1 and 
+               Country_B = 1 
+                ")
+c11 <- sqldf("
+             select * from c11 
+             group by Year, Region1, Intensity, Intensity_norm, edge
+             ")
+
+c12 <- sqldf("
+            select * from full_set 
+            where Country_A = 1 and 
+            Country_B = 2
+             ")
+c22 <- sqldf("
+            select * from full_set
+            where Country_A = 2 and 
+            Country_B = 2
+             ")
+c21 <- sqldf("
+             select * from full_set 
+             where Country_A = 2 and 
+             Country_B = 1
+             ")
+
 
 # Partial set link intensity plot -----------------------------------------
 
