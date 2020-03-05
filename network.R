@@ -104,10 +104,46 @@ paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)
 
 # Create full set ---------------------------------------------------------
 regions <- data.frame()
-for (a in 188:2){
+for (a in 2:188){
   for (i in 1:189){
     c <- expand.grid(i,a)
     regions <- rbind(regions, c)
+  }
+}
+remove(a,i,c)
+regions <- sqldf("select * from regions where Var1<>Var2")
+
+#test duplicates
+regions$edge1 <- paste(regions$Var1, "-", regions$Var2, sep="")
+regions$edge2 <- paste(regions$Var2, "-", regions$Var1, sep="")
+test <- sqldf("select edge1 from regions excpet select edge2 from regions")
+paste("region list has no duplicate rows:", nrow(regions)==nrow(test))
+remove(test)
+
+#add rows to par_set
+full_set <- `Network Data`
+for (c1 in 1:2){
+  for (c2 in 1:2){
+    for (y in 1991:2017) {
+test <- sqldf("select edge1 from regions  
+              except 
+                select edge1 from par_set 
+                  where Year=1991 
+                  and Country_A=1 
+                  and border=0
+                  union 
+                  select edge2 as edge1 from par_set
+                    where Year=1991
+                    and Country_A=1
+                    and border=0")
+addrow <- sqldf("select 1991 as Year, Var1 as Region_A, 1 as Country_A, 
+                Var2 as Region_B, 1 as Country_B,0 as Intensity
+                from regions where edge1 in 
+                (select edge1 from test) 
+                or edge2 in 
+                (select edge1 as edge2 from test)")
+full_set <- rbind(full_set, addrow)
+    }
   }
 }
 
