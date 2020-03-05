@@ -104,19 +104,21 @@ paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)
 
 # Create full set ---------------------------------------------------------
 regions <- data.frame()
-for (a in 2:188){
+for (a in 1:189){
   for (i in 1:189){
     c <- expand.grid(i,a)
-    regions <- rbind(regions, c)
+    if(c$Var1 != c$Var2) {
+      if(c$Var1 > c$Var2){
+        regions <- rbind(regions, c)        
+      }
+    }
   }
 }
 remove(a,i,c)
-regions <- sqldf("select * from regions where Var1<>Var2")
-
 #test duplicates
 regions$edge1 <- paste(regions$Var1, "-", regions$Var2, sep="")
 regions$edge2 <- paste(regions$Var2, "-", regions$Var1, sep="")
-test <- sqldf("select edge1 from regions excpet select edge2 from regions")
+test <- sqldf("select edge1 from regions except select edge2 from regions")
 paste("region list has no duplicate rows:", nrow(regions)==nrow(test))
 remove(test)
 
