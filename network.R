@@ -66,7 +66,7 @@ par_set$Intensity_norm = (
 cor(par_set$Intensity, par_set$Intensity_norm) == 1
 
 
-# TEST duplicate rows -------------------------------------------------
+# TEST duplicate rows [NO DUPLICATE ROWS] -------------------------------------------------
 par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
 par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
 
