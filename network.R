@@ -99,10 +99,19 @@ for (c1 in 1:2){
     }
   }    
 }
+remove(c1,c2,f,y,r,s,t,z)
 paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)  
 
-
 # Create full set ---------------------------------------------------------
+regions <- data.frame()
+for (a in 188:2){
+  for (i in 1:189){
+    c <- expand.grid(i,a)
+    regions <- rbind(regions, c)
+  }
+}
+
+# [OLD] Create full set ---------------------------------------------------------
 
 #This block creates a full data set that contains all the missing links 
 
