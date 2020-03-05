@@ -66,6 +66,42 @@ par_set$Intensity_norm = (
 cor(par_set$Intensity, par_set$Intensity_norm) == 1
 
 
+# TEST duplicate rows -------------------------------------------------
+par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
+par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
+
+par_set <- par_set %>%
+  mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
+  mutate(border=ifelse(Country_A!=Country_B, 1, 0))
+
+test_doubles <- data.frame()
+for (c1 in 1:2){
+  for (c2 in 1:2){
+    for (y in 1991:2017) {
+      s <- paste("select count(*) 
+                 from par_set where Year=",y,
+                 " and Country_A=",c1,
+                 " and Country_B=",c2, 
+                 " and autolink=0", sep="")
+      r <- as.numeric(sqldf(s))
+      f <- paste("select edge1 from par_set where Year=",y,
+                 " and Country_A=",c1,
+                 " and Country_B=",c2,
+                 " and autolink=0
+                 except 
+                 select edge2 from par_set where Year=",y,
+                 " and Country_A=",c1,
+                 " and Country_B=",c2,
+                 " and autolink=0", sep="")
+      t <- sqldf(f)
+      z <- data.frame(Year=y, CountryA=c1, no_doubles=nrow(t)==r)
+      test_doubles <- rbind(test_doubles, z)
+    }
+  }    
+}
+paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)  
+
+
 # Create full set ---------------------------------------------------------
 
 #This block creates a full data set that contains all the missing links 
@@ -109,64 +145,6 @@ max(test_unique$rownumb)==1
 
 #This code removes the temporary data frames
 rm("comp_set", "dif", "test_unique")
-
-# Collapse duplicate rows -------------------------------------------------
-par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
-par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
-
-par_set <- par_set %>%
-  mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
-  mutate(border=ifelse(Country_A!=Country_B, 1, 0))
-
-#test double links
-
-raw_rowcount <- sqldf("select count(*) from par_set where Year=1991 and Country_A=1 and border=0 and autolink=0")
-test1 <- sqldf("
-                select edge1 from par_set where Year=1991 and Country_A=1 and border=0 and autolink=0
-                except 
-                select edge2 from par_set where Year=1991 and Country_A=1 and border=0 and autolink=0
-              ")
-
-
-c11a <- sqldf("
-             select Year, Region_A as Region1, 
-              Intensity, Intensity_norm, edge1 as edge
-             from par_set 
-             where Country_A = 1 and 
-             Country_B = 1
-             ")
-c11b <- sqldf("select Year, Region_B as Region1, 
-                Intensity, Intensity_norm, edge2 as edge, edge1 as d
-                from par_set 
-               where Country_A = 1 and 
-               Country_B = 1 
-                ")
-c11 <- sqldf("
-             select a.Year, a.Region1, null as Region2, 1 as country, 0 as border, 
-              a.Intensity, b.Intensity, a.Intensity + b.Intensity, a.edge, b.edge, b.d
-             from c11a a inner join c11b b 
-             on a.edge = b.edge and a.edge <> b.d
-             except 
-             
-             ")
-
-
-c12 <- sqldf("
-            select * from full_set 
-            where Country_A = 1 and 
-            Country_B = 2
-             ")
-c22 <- sqldf("
-            select * from full_set
-            where Country_A = 2 and 
-            Country_B = 2
-             ")
-c21 <- sqldf("
-             select * from full_set 
-             where Country_A = 2 and 
-             Country_B = 1
-             ")
-
 
 # Partial set link intensity plot -----------------------------------------
 
