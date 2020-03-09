@@ -50,6 +50,13 @@ rm(list=setdiff(ls(), "old.par"))
 source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network%20Data.rdata?raw=true")
 par_set <- `Network Data`
 
+par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
+par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
+
+par_set <- par_set %>%
+  mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
+  mutate(border=ifelse(Country_A!=Country_B, 1, 0))
+
 #If the import doesn't work, you can load the data locally (from the original stata file): 
 #your_work_directory <- "C:/Users/User/Documents/network_analysis"
 #setwd(your_work_directory)
@@ -66,14 +73,7 @@ par_set$Intensity_norm = (
 cor(par_set$Intensity, par_set$Intensity_norm) == 1
 
 
-# TEST duplicate rows [NO DUPLICATE ROWS] -------------------------------------------------
-par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
-par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
-
-par_set <- par_set %>%
-  mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
-  mutate(border=ifelse(Country_A!=Country_B, 1, 0))
-
+# TEST duplicate rows partial set [NO DUPLICATE ROWS] -------------------------------------------------
 test_doubles <- data.frame()
 for (c1 in 1:2){
   for (c2 in 1:2){
@@ -99,8 +99,8 @@ for (c1 in 1:2){
     }
   }    
 }
-remove(c1,c2,f,y,r,s,t,z)
 paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)  
+remove(c1,c2,f,y,r,s,t,z, test_doubles)
 
 # Create full set ---------------------------------------------------------
 regions <- data.frame()
@@ -127,27 +127,67 @@ full_set <- `Network Data`
 for (c1 in 1:2){
   for (c2 in 1:2){
     for (y in 1991:2017) {
-test <- sqldf("select edge1 from regions  
+    t <- paste("select edge1 from regions  
               except 
                 select edge1 from par_set 
-                  where Year=1991 
-                  and Country_A=1 
-                  and border=0
-                  union 
+                  where Year=",y, 
+                  " and Country_A=",c1,
+                  " and Country_B=",c2,
+                  " union 
                   select edge2 as edge1 from par_set
-                    where Year=1991
-                    and Country_A=1
-                    and border=0")
-addrow <- sqldf("select 1991 as Year, Var1 as Region_A, 1 as Country_A, 
-                Var2 as Region_B, 1 as Country_B,0 as Intensity
+                    where Year=",y,
+                    " and Country_A=",c1,
+                    " and border=",c2,sep="")
+    test <- sqldf(t)
+    a <- paste("select ",y," as Year, Var1 as Region_A, ",c1," as Country_A, 
+                Var2 as Region_B, ",c2," as Country_B,0 as Intensity
                 from regions where edge1 in 
                 (select edge1 from test) 
                 or edge2 in 
                 (select edge1 as edge2 from test)")
+    addrow <- sqldf(a)
 full_set <- rbind(full_set, addrow)
     }
   }
 }
+
+full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
+full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
+
+full_set <- full_set %>%
+  mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
+  mutate(border=ifelse(Country_A!=Country_B, 1, 0))
+
+
+# TEST duplicate rows full set [NO DUPLICATE ROWS] -------------------------------------------------
+test_doubles <- data.frame()
+for (c1 in 1:2){
+  for (c2 in 1:2){
+    for (y in 1991:2017) {
+      s <- paste("select count(*) 
+                 from full_set where Year=",y,
+                 " and Country_A=",c1,
+                 " and Country_B=",c2, 
+                 " and autolink=0", sep="")
+      r <- as.numeric(sqldf(s))
+      f <- paste("select edge1 from full_set where Year=",y,
+                 " and Country_A=",c1,
+                 " and Country_B=",c2,
+                 " and autolink=0
+                 except 
+                 select edge2 from full_set where Year=",y,
+                 " and Country_A=",c1,
+                 " and Country_B=",c2,
+                 " and autolink=0", sep="")
+      t <- sqldf(f)
+      z <- data.frame(Year=y, CountryA=c1, no_doubles=nrow(t)==r)
+      test_doubles <- rbind(test_doubles, z)
+    }
+  }    
+}
+paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)  
+remove(c1,c2,f,y,r,s,t,z, test_doubles)
+
 
 # [OLD] Create full set ---------------------------------------------------------
 
