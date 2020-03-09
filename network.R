@@ -18,6 +18,7 @@
 #install.packages("ggplot2")
 #install.packages("sna")
 #install.packages("qgraph")
+#install.packages("plm")
 
 #Then load the packages into the current working session:
 library(igraph)
@@ -29,6 +30,7 @@ library(ggplot2)
 library(sna)
 library(qgraph)
 library(data.table)
+library(plm)
 
 #!!!!! Run seperately the first time: this might prompt you with a quesiton if you want to load 
 #external data in a temporary cache or create a seperate folder. Either is fine, 
@@ -57,21 +59,14 @@ par_set <- par_set %>%
   mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
   mutate(border=ifelse(Country_A!=Country_B, 1, 0))
 
+par_set <- par_set %>% 
+  mutate(c1=ifelse(Country_A==1|Country_B==1, 1,0)) %>%
+  mutate(c2=ifelse(Country_A==2|Country_B==2, 1,0))
+
 #If the import doesn't work, you can load the data locally (from the original stata file): 
 #your_work_directory <- "C:/Users/User/Documents/network_analysis"
 #setwd(your_work_directory)
 #par_set <- read.dta13("network_data.dta")
-
-# Normalize Intensity -----------------------------------------------------
-
-#This code creates a normalized measure for the link intensity and test the 
-#correlation with the raw version of the link intensity. Should return "TRUE"
-par_set$Intensity_norm = (
-  par_set$Intensity-min(par_set$Intensity)) / 
-  (max(par_set$Intensity)-min(par_set$Intensity)
-  )
-cor(par_set$Intensity, par_set$Intensity_norm) == 1
-
 
 # TEST duplicate rows partial set [NO DUPLICATE ROWS] -------------------------------------------------
 test_doubles <- data.frame()
@@ -123,33 +118,62 @@ paste("region list has no duplicate rows:", nrow(regions)==nrow(test))
 remove(test)
 
 #add rows to par_set
-full_set <- `Network Data`
-for (c1 in 1:2){
-  for (c2 in 1:2){
-    for (y in 1991:2017) {
+full_set <- select (par_set,c(Year, Region_A, c1, Region_B, c2, Intensity))
+for (y in 1991:2017) {
     t <- paste("select edge1 from regions  
               except 
                 select edge1 from par_set 
                   where Year=",y, 
-                  " and Country_A=",c1,
-                  " and Country_B=",c2,
-                  " union 
+                  " and c1=1 and c2=0 
+                  union 
                   select edge2 as edge1 from par_set
                     where Year=",y,
-                    " and Country_A=",c1,
-                    " and border=",c2,sep="")
+                    " and c1=1 and c2=0",sep="")
     test <- sqldf(t)
-    a <- paste("select ",y," as Year, Var1 as Region_A, ",c1," as Country_A, 
-                Var2 as Region_B, ",c2," as Country_B,0 as Intensity
+    a <- paste("select ",y," as Year, Var1 as Region_A, 1 as c1, 
+                Var2 as Region_B, 0 as c2,0 as Intensity
                 from regions where edge1 in 
-                (select edge1 from test) 
-                or edge2 in 
-                (select edge1 as edge2 from test)")
+                (select edge1 from test)")
     addrow <- sqldf(a)
 full_set <- rbind(full_set, addrow)
-    }
-  }
 }
+for (y in 1991:2017) {
+  t <- paste("select edge1 from regions  
+              except 
+                select edge1 from par_set 
+                  where Year=",y, 
+             " and c1=0 and c2=1 
+                  union 
+                  select edge2 as edge1 from par_set
+                    where Year=",y,
+             " and c1=0 and c2=1",sep="")
+  test <- sqldf(t)
+  a <- paste("select ",y," as Year, Var1 as Region_A, 0 as c1, 
+                Var2 as Region_B, 1 as c2,0 as Intensity
+                from regions where edge1 in 
+                (select edge1 from test)")
+  addrow <- sqldf(a)
+  full_set <- rbind(full_set, addrow)
+}
+for (y in 1991:2017) {
+  t <- paste("select edge1 from regions  
+              except 
+                select edge1 from par_set 
+                  where Year=",y, 
+             " and c1=1 and c2=1 
+                  union 
+                  select edge2 as edge1 from par_set
+                    where Year=",y,
+             " and c1=1 and c2=1",sep="")
+  test <- sqldf(t)
+  a <- paste("select ",y," as Year, Var1 as Region_A, 1 as c1, 
+                Var2 as Region_B, 1 as c2,0 as Intensity
+                from regions where edge1 in 
+                (select edge1 from test)")
+  addrow <- sqldf(a)
+  full_set <- rbind(full_set, addrow)
+}
+
 
 full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
 full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
@@ -159,7 +183,7 @@ full_set <- full_set %>%
   mutate(border=ifelse(Country_A!=Country_B, 1, 0))
 
 
-# TEST duplicate rows full set [NO DUPLICATE ROWS] -------------------------------------------------
+# TEST duplicate rows full set [STILL HAS DUPLICATES] -------------------------------------------------
 test_doubles <- data.frame()
 for (c1 in 1:2){
   for (c2 in 1:2){
@@ -185,9 +209,8 @@ for (c1 in 1:2){
     }
   }    
 }
-paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)  
+paste("Data has duplicate rows: ", FALSE %in% test_doubles$no_doubles)  
 remove(c1,c2,f,y,r,s,t,z, test_doubles)
-
 
 # [OLD] Create full set ---------------------------------------------------------
 
@@ -232,6 +255,22 @@ max(test_unique$rownumb)==1
 
 #This code removes the temporary data frames
 rm("comp_set", "dif", "test_unique")
+
+# Normalize Intensity -----------------------------------------------------
+
+#This code creates a normalized measure for the link intensity and test the 
+#correlation with the raw version of the link intensity. Should return "TRUE"
+par_set$Intensity_norm = (
+  par_set$Intensity-min(par_set$Intensity)) / 
+  (max(par_set$Intensity)-min(par_set$Intensity)
+  )
+cor(par_set$Intensity, par_set$Intensity_norm) == 1
+full_set$Intensity_norm = (
+  full_set$Intensity-min(full_set$Intensity)) / 
+  (max(full_set$Intensity)-min(full_set$Intensity)
+  )
+cor(full_set$Intensity, full_set$Intensity_norm) == 1
+
 
 # Partial set link intensity plot -----------------------------------------
 
