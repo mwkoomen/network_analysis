@@ -173,6 +173,7 @@ for (y in 1991:2017) {
   addrow <- sqldf(a)
   full_set <- rbind(full_set, addrow)
 }
+remove(t,y,a)
 
 full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
 full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
@@ -274,85 +275,75 @@ cor(full_set$Intensity, full_set$Intensity_norm) == 1
 
 #This code block will plot the link intesity per country (internal/external) per year using the partial 
   pc1c1 <- par_set %>%
-    filter(Country_A==1, Country_B==1) %>%
+    filter(c1==1, c2==0) %>%
     group_by(Year) %>%
     summarise(mean(Intensity))
   pc1c2 <- par_set %>%
-    filter(Country_A==1, Country_B==2) %>%
+    filter(c1==1, c2==1) %>%
     group_by(Year) %>%
     summarise(mean(Intensity))
   pc2c2 <- par_set %>%
-    filter(Country_A==2, Country_B==2) %>%
-    group_by(Year) %>%
-    summarise(mean(Intensity))
-  pc2c1 <- par_set %>%
-    filter(Country_A==2, Country_B==1) %>%
+    filter(c1==0, c2==1) %>%
     group_by(Year) %>%
     summarise(mean(Intensity))
 #plot
 plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
-       main = "Network Intensity (partial)") 
-  lines(pc2c1, type = "o", col = "blue") 
+       main = "Network Intensity (partial)", ylim=C(0,60000)) 
   lines(pc1c1, type = "o", col = "darkgreen")
-  lines(pc1c2, type = "o", col = "orange")
-  legend(1991, 45000, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-         col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
+  lines(pc1c2, type = "o", col = "blue")
+  legend(1991, 45000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
+         col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n")
 
   
 # Full set link intensity plot --------------------------------------------
 
 #This code block will plot the link intesity per country (internal/external) per year using the full set
   fc1c1 <- full_set %>%
-    filter(Country_A==1, Country_B==1) %>%
+    filter(c1==1, c2==0) %>%
     group_by(Year) %>%
     summarise(mean(Intensity))
   fc1c2 <- full_set %>%
-    filter(Country_A==1, Country_B==2) %>%
+    filter(c1==1, c2==1) %>%
     group_by(Year) %>%
     summarise(mean(Intensity))
   fc2c2 <- full_set %>%
-    filter(Country_A==2, Country_B==2) %>%
+    filter(c1==0, c2==1) %>%
     group_by(Year) %>%
-    summarise(mean(Intensity))
-  fc2c1 <- full_set %>%
-    filter(Country_A==2, Country_B==1) %>%
-    group_by(Year) %>%
-    summarise(mean(Intensity))
+    summarise
+  par(mfrow=c(2,1), oma = c(0, 0, 2, 0))
   plot(fc1c1,type = "o",col = "darkgreen", xlab = "Year", ylab = "Intensity", 
-       main = "Network Intensity (full)") 
-  lines(fc1c2, type = "o", col = "orange") 
+       main = "Network Intensity (full)", ylim=c(0, 60000)) 
+  lines(fc1c2, type = "o", col = "blue") 
   lines(fc2c2, type = "o", col = "red")
-  lines(fc2c1, type = "o", col = "blue")
-  legend(1991, 8500, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-         col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
-# Count zeros --------------------------------------------
+  legend(1991, 60000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
+         col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n")
+  plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
+       main = "Network Intensity (partial)", ylim=C(0,60000)) 
+  lines(pc1c1, type = "o", col = "darkgreen")
+  lines(pc1c2, type = "o", col = "blue")
+  legend(1991, 45000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
+         col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n")
   
+# Count zeros --------------------------------------------
   zc1c1 <- full_set %>%
-    filter(Country_A==1, Country_B==1 & Intensity==0) %>%
+    filter(c1==1, c2==0 & Intensity==0) %>%
     group_by(Year) %>%
     count(Intensity)
   zc1c1$n <- round(zc1c1$n/189)
   zc1c2 <- full_set %>%
-    filter(Country_A==1, Country_B==2 & Intensity==0) %>%
+    filter(c1==1, c2==1 & Intensity==0) %>%
     group_by(Year) %>%
     count(Intensity)
   zc1c2$n <- round(zc1c2$n/189)
   zc2c2 <- full_set %>%
-    filter(Country_A==2, Country_B==2 & Intensity==0) %>%
+    filter(c1==0, c2==1 & Intensity==0) %>%
     group_by(Year) %>%
     count(Intensity)
-  zc2c2$n <- round(zc2c2$n/189)
-  zc2c1 <- full_set %>%
-    filter(Country_A==2, Country_B==1 & Intensity==0) %>%
-    group_by(Year) %>%
-    count(Intensity)
-  zc2c1$n <- round(zc2c1$n/189)
   zc1c1$link <- "Country 1: Internal"
-  zc1c2$link <- "Country 1: External"
+  zc1c2$link <- "Country 1-2: External"
   zc2c2$link <- "Country 2: Internal"
-  zc2c1$link <- "Country 2: External"
-  zero.vertices <- rbind(zc1c1, zc1c2, zc2c2, zc2c1)  
-  remove(zc1c1, zc1c2, zc2c2, zc2c1)
+  zero.vertices <- rbind(zc1c1, zc1c2, zc2c2)  
+  remove(zc1c1, zc1c2, zc2c2)
   
   p <- ggplot(zero.vertices, aes(Year, n))
   p +  ggtitle("# vertices with no edges") + 
