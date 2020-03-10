@@ -173,7 +173,7 @@ for (y in 1991:2017) {
   addrow <- sqldf(a)
   full_set <- rbind(full_set, addrow)
 }
-remove(t,y,a)
+remove(t,y,a,test,addrow)
 
 full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
 full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
@@ -288,7 +288,7 @@ cor(full_set$Intensity, full_set$Intensity_norm) == 1
     summarise(mean(Intensity))
 #plot
 plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
-       main = "Network Intensity (partial)", ylim=C(0,60000)) 
+       main = "Network Intensity (partial)", ylim=c(0,60000)) 
   lines(pc1c1, type = "o", col = "darkgreen")
   lines(pc1c2, type = "o", col = "blue")
   legend(1991, 45000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
@@ -310,18 +310,18 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
     filter(c1==0, c2==1) %>%
     group_by(Year) %>%
     summarise
-  par(mfrow=c(2,1), oma = c(0, 0, 2, 0))
+  par(mfrow=c(1,2), oma = c(0, 0, 0, 0))
+  plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
+       main = "Network Intensity (partial)", ylim=c(0,60000)) 
+  lines(pc1c1, type = "o", col = "darkgreen")
+  lines(pc1c2, type = "o", col = "blue")
+  #legend(1991, 60000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
+         #col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n")
   plot(fc1c1,type = "o",col = "darkgreen", xlab = "Year", ylab = "Intensity", 
        main = "Network Intensity (full)", ylim=c(0, 60000)) 
   lines(fc1c2, type = "o", col = "blue") 
   lines(fc2c2, type = "o", col = "red")
   legend(1991, 60000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
-         col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n")
-  plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity", 
-       main = "Network Intensity (partial)", ylim=C(0,60000)) 
-  lines(pc1c1, type = "o", col = "darkgreen")
-  lines(pc1c2, type = "o", col = "blue")
-  legend(1991, 45000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
          col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n")
   
 # Count zeros --------------------------------------------
