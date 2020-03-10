@@ -174,16 +174,14 @@ for (y in 1991:2017) {
   full_set <- rbind(full_set, addrow)
 }
 
-
 full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
 full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
 
 full_set <- full_set %>%
-  mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
-  mutate(border=ifelse(Country_A!=Country_B, 1, 0))
+  mutate(autolink=ifelse(c1+c2<=1, 1, 0)) %>%
+  mutate(border=ifelse(c1+c2>=2, 1, 0))
 
-
-# TEST duplicate rows full set [STILL HAS DUPLICATES] -------------------------------------------------
+# TEST duplicate rows full set [No DUPLICATES!!!] -------------------------------------------------
 test_doubles <- data.frame()
 for (c1 in 1:2){
   for (c2 in 1:2){
@@ -371,7 +369,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   #        col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")
 
 
-# Construct adjacency matrix per year, country, links [directed]------------------------------------------------
+# Construct adjacency matrix per year, country, links [directed] ------------------------------------------------
   nodes <- data.frame(ID=1:189)
   
   #Country 1: Internal links 
@@ -412,7 +410,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   plot(delete.vertices(simplify(net_12_2017), degree(net_12_2017)==0), 
        layout=layout_with_fr, vertex.label = NA, vertex.size=6)  
 
-# Construct adjacency matrix per year, country, links [undirected]------------------------------------------------
+# Construct adjacency matrix per year, country, links [undirected] ------------------------------------------------
   nodes <- data.frame(ID=1:189)
   
   #Country 1: Internal links 
@@ -973,7 +971,7 @@ remove(x,i,s,links, nodes, net, n)
   legend(1991, 0.12, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1, cex=0.8, bty="n")  
   
-# Construct nework graphs / adjacency matrix per year, country (works)------------------------------------------------
+# Construct nework graphs / adjacency matrix per year, country (works) ------------------------------------------------
   nodes <- data.frame(ID=1:378)
   
   #Country 1:  
@@ -1475,7 +1473,7 @@ harm_cent11 <- data.frame()
             outer=TRUE, cex=1, font=2)      
       
       
-# Compute closeness centrality (not recommended)--------------------------------------
+# Compute closeness centrality (not recommended) --------------------------------------
   nodes <- data.frame(ID=1:189)
   
   #Country 1: Internal links 
@@ -1516,7 +1514,7 @@ harm_cent11 <- data.frame()
   }
   remove(x,i,s,links, nodes, net, n)
   
-  # Compile CLoseness Centrality (not recommended)-----------------------------------------------
+  # Compile CLoseness Centrality (not recommended) -----------------------------------------------
 
 year <- c(1991:2017)
   #country 1: internal
@@ -1877,7 +1875,7 @@ year <- c(1991:2017)
     deg.cent_21_2017)
   remove(year, cn)
   
-  # Plot (not recommended)--------------------------------------------------------------------
+  # Plot (not recommended) --------------------------------------------------------------------
   #plot  
   plot(degree_centrality22$year,degree_centrality22$cn, type = "o",col = "red", xlab = "Year", ylab = "Degree Centrality", 
        main = "Degree centrality", ylim = c(0.15,0.45)) 
@@ -1896,7 +1894,7 @@ year <- c(1991:2017)
   legend(2010, 0.000012, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
          col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8)  
   
-# Newman-Garvin clustering (not very usefull)------------------------------------------------
+# Newman-Garvin clustering (not very usefull) ------------------------------------------------
 par(old.par)
   ceb <- cluster_edge_betweenness(net_11_1991)
   #dendPlot(ceb, mode="hclust")
@@ -1949,7 +1947,7 @@ par(old.par)
   
     
   
-# Compute and plot eigenvector centrality (needs revision)---------------------------------
+# Compute and plot eigenvector centrality (needs revision) ---------------------------------
   #Country 1: Internal links 
   for (i in 1991:2017) {
     s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
@@ -1984,7 +1982,7 @@ par(old.par)
   }
   remove(x,g,i,s,eigenv)
 
-  # Compile eigenvector centrality (needs revision)-----------------------------------------------------------------
+  # Compile eigenvector centrality (needs revision) -----------------------------------------------------------------
 #compile eigenvalues into data frames  
 year <- c(1991:2017)
 #country 1 internal
@@ -2217,7 +2215,7 @@ remove(
   ev_21_2017)
 remove(year, eigenvalue)
 
-  # Plot eigenvector centrality (needs revision)--------------------------------------------------------------------
+  # Plot eigenvector centrality (needs revision) --------------------------------------------------------------------
 #plot
 plot(eigenvalue22,type = "o",col = "red", xlab = "Year", ylab = "Centrality", 
      main = "Eigenvector centrality (partial)") 
