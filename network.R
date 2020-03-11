@@ -4,7 +4,6 @@
 
 # Initialize --------------------------------------------------------------
 
-
 #Load block, if these packages are not installed, you have to remove the pound sign and 
 #run each code. 
 
@@ -59,6 +58,16 @@ par_set <- par_set %>%
 par_set <- par_set %>% 
   mutate(c1=ifelse(Country_A==1|Country_B==1, 1,0)) %>%
   mutate(c2=ifelse(Country_A==2|Country_B==2, 1,0))
+
+par_set <- par_set %>% 
+  mutate(rid1=ifelse(Country_A==1, par_set$Region_A, par_set$Region_A+189)) %>%
+  mutate(rid2=ifelse(Country_B==1, par_set$Region_B, par_set$Region_B+189))
+
+par_set$Intensity_norm = (
+  par_set$Intensity-min(par_set$Intensity)) / 
+  (max(par_set$Intensity)-min(par_set$Intensity)
+  )
+cor(par_set$Intensity, par_set$Intensity_norm) == 1
 
 #If the import doesn't work, you can load the data locally (from the original stata file): 
 #your_work_directory <- "C:/Users/User/Documents/network_analysis"
@@ -180,6 +189,12 @@ full_set <- full_set %>%
   mutate(autolink=ifelse(c1+c2<=1, 1, 0)) %>%
   mutate(border=ifelse(c1+c2>=2, 1, 0))
 
+full_set$Intensity_norm = (
+  full_set$Intensity-min(full_set$Intensity)) / 
+  (max(full_set$Intensity)-min(full_set$Intensity)
+  )
+cor(full_set$Intensity, full_set$Intensity_norm) == 1
+
 # TEST duplicate rows full set [No DUPLICATES!!!] -------------------------------------------------
 test_doubles <- data.frame()
 for (c1 in 1:2){
@@ -208,23 +223,6 @@ for (c1 in 1:2){
 }
 paste("Data has duplicate rows: ", FALSE %in% test_doubles$no_doubles)  
 remove(c1,c2,f,y,r,s,t,z, test_doubles)
-
-# Normalize Intensity -----------------------------------------------------
-
-#This code creates a normalized measure for the link intensity and test the 
-#correlation with the raw version of the link intensity. Should return "TRUE"
-par_set$Intensity_norm = (
-  par_set$Intensity-min(par_set$Intensity)) / 
-  (max(par_set$Intensity)-min(par_set$Intensity)
-  )
-cor(par_set$Intensity, par_set$Intensity_norm) == 1
-
-full_set$Intensity_norm = (
-  full_set$Intensity-min(full_set$Intensity)) / 
-  (max(full_set$Intensity)-min(full_set$Intensity)
-  )
-cor(full_set$Intensity, full_set$Intensity_norm) == 1
-
 
 # Partial set link intensity plot -----------------------------------------
 
@@ -321,15 +319,15 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   
   #Country 1: Internal links 
   for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
+    s <- paste("select * from par_set where Year = ", i, "and c1=1 and c2=0")
     x <- sqldf(s)
     n <- paste("net_11_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
     assign(n, graph_from_data_frame(links, nodes, directed = F))
   }
-  #Country 1: External links  
+  #Country 1-2: External links  
   for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 2")
+    s <- paste("select * from par_set where Year = ", i, " and c1=1 and c2=1")
     x <- sqldf(s)
     n <- paste("net_12_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
@@ -337,16 +335,8 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   }
   #Country 2: Internal links  
   for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
+    s <- paste("select * from par_set where Year = ", i, " and c1=0 and c2=1")
     n <- paste("net_22_", i, sep="")
-    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
-    assign(n, graph_from_data_frame(links, nodes, directed = F))
-  }
-  #Country 2: External links  
-  for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 1")
-    x <- sqldf(s)
-    n <- paste("net_21_", i, sep="")
     links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w1=x$Intensity, w2=x$Intensity_norm)
     assign(n, graph_from_data_frame(links, nodes, directed = F))
   }
@@ -357,21 +347,20 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   plot(delete.vertices(simplify(net_12_2017), degree(net_12_2017)==0), 
        layout=layout_with_fr, vertex.label = NA, vertex.size=6)  
   
-# Degree distibution plots [not normalized] [unweighted] (works) ------------------------------------------------
-
-#C1 external links  
-  deg12_1 <- degree(net_12_1991, mode="all")
-  deg12_2 <- degree(net_12_1996, mode="all")
-  deg12_3 <- degree(net_12_2001, mode="all")
-  deg12_4 <- degree(net_12_2006, mode="all")
-  deg12_5 <- degree(net_12_2011, mode="all")
-  deg12_6 <- degree(net_12_2017, mode="all")  
-  deg.dist12_1 <- degree_distribution(net_12_1991, cumulative=T, mode="all")
-  deg.dist12_2 <- degree_distribution(net_12_1996, cumulative=T, mode="all")
-  deg.dist12_3 <- degree_distribution(net_12_2001, cumulative=T, mode="all")
-  deg.dist12_4 <- degree_distribution(net_12_2006, cumulative=T, mode="all")
-  deg.dist12_5 <- degree_distribution(net_12_2011, cumulative=T, mode="all")
-  deg.dist12_6 <- degree_distribution(net_12_2017, cumulative=T, mode="all")  
+# Degree distibution plots [not normalized] [unweighted] (needs revision) ------------------------------------------------
+#C1-2 external links 
+  deg12_1 <- degree(net_12_1991)
+  deg12_2 <- degree(net_12_1996)
+  deg12_3 <- degree(net_12_2001)
+  deg12_4 <- degree(net_12_2006)
+  deg12_5 <- degree(net_12_2011)
+  deg12_6 <- degree(net_12_2017)  
+  deg.dist12_1 <- degree_distribution(net_12_1991, cumulative=T)
+  deg.dist12_2 <- degree_distribution(net_12_1996, cumulative=T)
+  deg.dist12_3 <- degree_distribution(net_12_2001, cumulative=T)
+  deg.dist12_4 <- degree_distribution(net_12_2006, cumulative=T)
+  deg.dist12_5 <- degree_distribution(net_12_2011, cumulative=T)
+  deg.dist12_6 <- degree_distribution(net_12_2017, cumulative=T)  
 #C1 internal links  
   deg11_1 <- degree(net_11_1991, mode="all")
   deg11_2 <- degree(net_11_1996, mode="all")
@@ -398,20 +387,7 @@ plot(pc2c2,type = "o",col = "red", xlab = "Year", ylab = "Intensity",
   deg.dist21_4 <- degree_distribution(net_21_2006, cumulative=T, mode="all")
   deg.dist21_5 <- degree_distribution(net_21_2011, cumulative=T, mode="all")
   deg.dist21_6 <- degree_distribution(net_21_2017, cumulative=T, mode="all")  
-#C2 internal links  
-  deg22_1 <- degree(net_22_1991, mode="all")
-  deg22_2 <- degree(net_22_1996, mode="all")
-  deg22_3 <- degree(net_22_2001, mode="all")
-  deg22_4 <- degree(net_22_2006, mode="all")
-  deg22_5 <- degree(net_22_2011, mode="all")
-  deg22_6 <- degree(net_22_2017, mode="all")  
-  deg.dist22_1 <- degree_distribution(net_22_1991, cumulative=T, mode="all")
-  deg.dist22_2 <- degree_distribution(net_22_1996, cumulative=T, mode="all")
-  deg.dist22_3 <- degree_distribution(net_22_2001, cumulative=T, mode="all")
-  deg.dist22_4 <- degree_distribution(net_22_2006, cumulative=T, mode="all")
-  deg.dist22_5 <- degree_distribution(net_22_2011, cumulative=T, mode="all")
-  deg.dist22_6 <- degree_distribution(net_22_2017, cumulative=T, mode="all")
-  
+
 #plot country 1  
   par(mfrow=c(2,3), oma = c(0,2,2,0))
   plot(x=0:max(deg11_1), y=1-deg.dist11_1, cex=1.2, col=rgb(0,0.4,0.8,alpha=0.4), ylim=c(0,1), xlim=c(0,130), 
@@ -510,6 +486,32 @@ for (i in 1991:2017) {
   assign(n, centr_degree(net, mode = "all", loops=TRUE, normalized = F))
 }
 remove(x,i,s,links, nodes, net, n)
+
+#For all links
+nodes <- data.frame(ID=1:378)
+dc <- data.frame()
+for (b in 0:1){
+  for (i in 1991:2017){
+    s <- paste("select * from par_set where Year = ", i,"and border=",b)
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$rid1, RegionB=x$rid2)
+    net <- graph_from_data_frame(links, nodes, directed = F)
+    n <- paste("deg.cent_", i, sep="")
+    assign(n, strength(net, mode = "all", loops=T))
+    t <- data.frame(rid1=1:378, rid2=1:378, Year=i, dc_w=get(n), border=b)
+    dc <- rbind(dc, t)
+    remove(i,s,x,links,net,n,t)
+  }
+}  
+remove(nodes)  
+
+dc_set <- left_join(par_set, dc, by=c("rid1", "Year", "border"))
+dc_set$rid2 <- dc_set$rid2.x
+dc_set <- left_join(dc_set, dc, by=c("rid2", "Year", "border"))
+dc_set <- dc_set %>% 
+  mutate(dc=ifelse(autolink==0, dc_w.x+dc_w.y, dc_w.x))
+
+
 
 # Compute and plot degree centrality [normalized] [unweighted] (works) --------------------------------------
   nodes <- data.frame(ID=1:189)
@@ -702,46 +704,59 @@ remove(x,i,s,links, nodes, net, n)
  
 # Compute and plot degree centrality [not normalized] [weighted] (works) --------------------------------------
   nodes <- data.frame(ID=1:189)
-  
   #Country 1: Internal links 
   for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 1")
+    s <- paste("select * from par_set where Year = ", i, " and c1=1 and c2=0")
     x <- sqldf(s)
-    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    links <- data.frame(RegionA=x$rid1, RegionB=x$rid2, w=1+x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = F)
     n <- paste("deg.cent_11_", i, sep="")
-    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+    assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
   }
-  #Country 1: External links  
+  #Country 1-2: External links
+  nodes <- data.frame(ID=1:378)
   for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 1 and Country_B = 2")
+    s <- paste("select * from par_set where Year = ", i, " and c1=1 and c2=1")
     x <- sqldf(s)
-    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    links <- data.frame(RegionA=x$rid1, RegionB=x$rid2, w=1+x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = F)
     n <- paste("deg.cent_12_", i, sep="")
-    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+    assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
   }
-  #Country 2: Internal links  
+  #Country 2: Internal links
+  nodes <- data.frame(ID=190:378)
   for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 2")
+    s <- paste("select * from par_set where Year = ", i, " and c1=0 and c2=1")
     x <- sqldf(s)
-    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
+    links <- data.frame(RegionA=x$rid1, RegionB=x$rid2, w=1+x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = F)
     n <- paste("deg.cent_22_", i, sep="")
-    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+    assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
   }
-  #Country 2: External links  
-  for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and Country_A = 2 and Country_B = 1")
+  remove(i,s,x,links,net,n,nodes)  
+
+#For all links
+  nodes <- data.frame(ID=1:378)
+  dc_weighted <- data.frame()
+  for (i in 1991:2017){
+    s <- paste("select * from par_set where Year = ", i)
     x <- sqldf(s)
-    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=x$Intensity_norm)
-    net <- graph_from_data_frame(links, nodes, directed = TRUE)
-    n <- paste("deg.cent_21_", i, sep="")
-    assign(n, strength(net, mode = "all", loops=TRUE, weights = E(net)$w))
+    links <- data.frame(RegionA=x$rid1, RegionB=x$rid2, w=1+x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes, directed = F)
+    n <- paste("deg.cent_", i, sep="")
+    assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
+    t <- data.frame(rid1=1:378, rid2=1:378, Year=i, dc_w=get(n))
+    dc_weighted <- rbind(dc_weighted, t)
+    remove(i,s,x,links,net,n,t)
   }
-  remove(x,i,s,links, nodes, net, n)
-  
-  
+  remove(nodes)  
+
+dc_set_w <- left_join(par_set, dc_weighted, by=c("rid1", "Year"))
+dc_set_w$rid2 <- dc_set_w$rid2.x
+dc_set_w <- left_join(dc_set_w, dc_weighted, by=c("rid2", "Year"))
+dc_set_w <- dc_set_w %>% 
+  mutate(dc=ifelse(autolink==0, dc_w.x+dc_w.y, dc_w.x))
+
   # Compile Degree Centrality [weighted] (works) -----------------------------------------------
   year <- c(1991:2017)
   #country 1: internal
@@ -1378,24 +1393,34 @@ harm_cent11 <- data.frame()
             outer=TRUE, cex=1, font=2)      
       
       
-# Fixed effects regression ------------------------------------------------
+# Fixed effects regressions ------------------------------------------------
   #Intensity ~ border (just with year) 
+      #partial set 
       py <- plm(Intensity_norm ~ border,
                 data = par_set, 
                 index = c("Year"),
                 model = "within")
+      coeftest(py)
+      #full set
       fy <- plm(Intensity_norm ~ border, 
                 data = full_set,
                 index = c("Year"), 
                 model = "within")
-      
-      # print summary using robust standard errors
-      coeftest(py)
       coeftest(fy)
-      
-  #Degree centraliy ~ border
-
-      
+  #Degree centrality ~ border [unweighted] 
+    dc_set$ID <- paste(dc_set$rid1.x, "-", dc_set$rid2.x, sep="")
+      dc_py <- plm(dc ~ border, 
+                 data = dc_set,
+                 index = c("Year", "ID"),
+                 model = "within")
+    coeftest(dc_py)
+    
+  #Degree centrality ~ border [weighted]
+    dc_w_py <- plm(dc ~ border, 
+                data = dc_set_w, 
+                index = c("Year"),
+                model = "within")
+    coeftest(dc_w_py)     
       
 # The graveyard -----------------------------------------------------------
       # Construct adjacency matrix per year, country, links [directed] ------------------------------------------------
