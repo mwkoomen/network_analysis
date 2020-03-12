@@ -27,7 +27,7 @@ library(sqldf)
 library(readstata13)
 library(CINNA)
 library(ggplot2)
-library(sna)
+#library(sna)
 library(qgraph)
 library(data.table)
 library(plm)
@@ -48,9 +48,6 @@ rm(list=setdiff(ls(), "old.par"))
 source_data("https://github.com/mwkoomen/network_analysis/blob/master/Network%20Data.rdata?raw=true")
 par_set <- `Network Data`
 
-par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
-par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
-
 par_set <- par_set %>%
   mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
   mutate(border=ifelse(Country_A!=Country_B, 1, 0))
@@ -62,6 +59,9 @@ par_set <- par_set %>%
 par_set <- par_set %>% 
   mutate(rid1=ifelse(Country_A==1, par_set$Region_A, par_set$Region_A+189)) %>%
   mutate(rid2=ifelse(Country_B==1, par_set$Region_B, par_set$Region_B+189))
+
+par_set$edge1 <- paste(par_set$rid1, "-", par_set$rid2, sep="")
+par_set$edge2 <- paste(par_set$rid2, "-", par_set$rid1, sep="")
 
 par_set$Intensity_norm = (
   par_set$Intensity-min(par_set$Intensity)) / 
@@ -354,92 +354,109 @@ for (a in 1:189){
   }
 }
 remove(a,i,c)
-regions_ext <- data.frame()
-for (a in 1:189){
-  for (i in 190:378){
-    c <- expand.grid(i,a)
-    if(c$Var1 != c$Var2) {
-      if(c$Var1 > c$Var2){
-        regions_ext <- rbind(regions_ext, c)        
-      }
-    }
-  }
-}
-remove(a,i,c)
-
+regions_ext <- regions_int
+regions_ext$Var1 <- regions_ext$Var1+189
 
 #test duplicates
-regions_int$edge1 <- paste(regions$Var1, "-", regions$Var2, sep="")
-regions_int$edge2 <- paste(regions$Var2, "-", regions$Var1, sep="")
-test <- sqldf("select edge1 from regions_int except select edge2 from regions_int")
-paste("Internal region list has no duplicate rows:", nrow(regions)==nrow(test))
-remove(test)
+regions_int$edge1 <- paste(regions_int$Var1, "-", regions_int$Var2, sep="")
+regions_int$edge2 <- paste(regions_int$Var2, "-", regions_int$Var1, sep="")
+test1 <- sqldf("select edge1 from regions_int except select edge2 from regions_int")
+regions_ext$edge1 <- paste(regions_ext$Var1, "-", regions_ext$Var2, sep="")
+regions_ext$edge2 <- paste(regions_ext$Var2, "-", regions_ext$Var1, sep="")
+test2 <- sqldf("select edge1 from regions_int except select edge2 from regions_ext")
+paste("Internal region list has no duplicate rows:", nrow(regions_int)==nrow(test1))
+paste("External region list has no duplicate rows:", nrow(regions_ext)==nrow(test2))
+remove(test1,test2)
 
 #add rows to par_set
-full_set <- select (par_set,c(Year, Region_A, c1, Region_B, c2, 
+full_set <- select (par_set,c(Year, rid1, c1, rid2, c2, 
                               Intensity))
+#country 1: internal
 for (y in 1991:2017) {
-  t <- paste("select edge1 from regions  
+  t <- paste("select edge1 from regions_int  
               except 
-                select edge1 from par_set 
-                  where Year=",y, 
-             " and c1=1 and c2=0 
+                select edge1 from par_set where Year=",y," and c1=1 and c2=0 
                   union 
-                  select edge2 as edge1 from par_set
-                    where Year=",y,
-             " and c1=1 and c2=0",sep="")
+                  select edge2 as edge1 from par_set 
+                    where Year=",y," and c1=1 and c2=0",sep="")
   test <- sqldf(t)
-  a <- paste("select ",y," as Year, Var1 as Region_A, 1 as c1, 
-                Var2 as Region_B, 0 as c2,0 as Intensity
-                from regions where edge1 in 
+  a <- paste("select ",y," as Year, Var1 as rid1, 1 as c1, 
+                Var2 as rid2, 0 as c2,0 as Intensity
+                from regions_int where edge1 in 
                 (select edge1 from test)")
   addrow <- sqldf(a)
   full_set <- rbind(full_set, addrow)
 }
+#country 2: internal
 for (y in 1991:2017) {
-  t <- paste("select edge1 from regions  
+  t <- paste("select edge1 from regions_int  
               except 
-                select edge1 from par_set 
-                  where Year=",y, 
-             " and c1=0 and c2=1 
+                select edge1 from par_set where Year=",y," and c1=0 and c2=1 
                   union 
                   select edge2 as edge1 from par_set
-                    where Year=",y,
-             " and c1=0 and c2=1",sep="")
+                    where Year=",y," and c1=0 and c2=1",sep="")
   test <- sqldf(t)
-  a <- paste("select ",y," as Year, Var1 as Region_A, 0 as c1, 
-                Var2 as Region_B, 1 as c2,0 as Intensity
-                from regions where edge1 in 
+  a <- paste("select ",y," as Year, Var1 as rid1, 0 as c1, 
+                Var2 as rid2, 1 as c2,0 as Intensity
+                from regions_int where edge1 in 
                 (select edge1 from test)")
   addrow <- sqldf(a)
   full_set <- rbind(full_set, addrow)
 }
+#country 1-2 external
 for (y in 1991:2017) {
-  t <- paste("select edge1 from regions  
+  t <- paste("select edge1 from regions_ext  
               except 
-                select edge1 from par_set 
-                  where Year=",y, 
-             " and c1=1 and c2=1 
+                select edge1 from par_set where Year=",y," and c1=1 and c2=1 
                   union 
                   select edge2 as edge1 from par_set
-                    where Year=",y,
-             " and c1=1 and c2=1",sep="")
+                    where Year=",y," and c1=1 and c2=1",sep="")
   test <- sqldf(t)
-  a <- paste("select ",y," as Year, Var1 as Region_A, 1 as c1, 
-                Var2 as Region_B, 1 as c2,0 as Intensity
-                from regions where edge1 in 
+  a <- paste("select ",y," as Year, Var1 as rid1, 1 as c1, 
+                Var2 as rid2, 1 as c2,0 as Intensity
+                from regions_ext where edge1 in 
                 (select edge1 from test)")
   addrow <- sqldf(a)
   full_set <- rbind(full_set, addrow)
 }
 remove(t,y,a,test,addrow)
 
-full_set$edge1 <- paste(full_set$Region_A, "-", full_set$Region_B, sep="")
-full_set$edge2 <- paste(full_set$Region_B, "-", full_set$Region_A, sep="")
-
 full_set <- full_set %>%
   mutate(autolink=ifelse(c1+c2<=1, 1, 0)) %>%
   mutate(border=ifelse(c1+c2>=2, 1, 0))
+
+full_set$edge1 <- paste(full_set$rid1, "-", full_set$rid2, sep="")
+full_set$edge2 <- paste(full_set$rid2, "-", full_set$rid1, sep="")
+
+test_doubles <- data.frame()
+for (c1 in 0:1){
+  for (c2 in 0:1){
+    for (y in 1991:2017) {
+      s <- paste("select count(*) 
+                 from full_set where Year=",y,
+                 " and c1=",c1,
+                 " and c2=",c2, 
+                 " and autolink=0", sep="")
+      r <- as.numeric(sqldf(s))
+      f <- paste("select edge1 from full_set where Year=",y,
+                 " and c1=",c1,
+                 " and c2=",c2,
+                 " and autolink=0
+                 except 
+                 select edge2 from full_set where Year=",y,
+                 " and c1=",c1,
+                 " and c2=",c2,
+                 " and autolink=0", sep="")
+      t <- sqldf(f)
+      z <- data.frame(Year=y, c1=c1, c2=c2, no_doubles=nrow(t)==r)
+      test_doubles <- rbind(test_doubles, z)
+    }
+  }    
+}
+paste("Data has duplicate rows: ", FALSE %in% test_doubles$no_doubles)  
+remove(c1,c2,f,y,r,s,t,z, test_doubles)
+
+#external links still have doubles
 
 full_set$Intensity_norm = (
   full_set$Intensity-min(full_set$Intensity)) / 
