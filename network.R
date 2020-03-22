@@ -67,7 +67,7 @@ old.par <- par(no.readonly = TRUE)
     select(Year, Region_B=Region_A, Country_B=Country_A, Region_A=Region_B, Country_A=Country_B, 
            Intensity, rid2=rid1, rid1=rid2, Intensity_norm)
   par_set <- rbind(t1, t2)
-  remove(t1)
+  remove(t1,t2)
   
 #add dummies for autolink (region connected to itself) and links across borders
   par_set <- par_set %>%
@@ -113,9 +113,16 @@ par_set <- par_set %>%
   remove(c1,c2,f,y,r,s,t,z, test_doubles)
 
 # Create full data set ---------------------------------------------------------
-
-  #need to look at region list: add autolinks region 
+#IDs 
+  #1 thru 22 are Country 2
+  # 23 thru 99 are Country 1 
+  # 100 thru 140 are Country 2  
+  # 141 thru 189 are Country 1
   
+regions_c2 <- c(1:22, 100:140) 
+regions_c1 <- c(23:99, 141:189)
+  
+#test number of autolinks per year: 
   autolink_count <- data.frame()
   for (i in 1991:2017){
     t <- paste("select Year, Country_A, count(Country_A) from par_set where autolink = 1 and Year=",i,
@@ -123,7 +130,8 @@ par_set <- par_set %>%
     test <- sqldf(t)
     autolink_count <- rbind(autolink_count, test)
   } 
-  
+  remove(test,t,i)
+#which autolinks are missing:  
   autolink_check <- data.frame()
   for (y in 1991:2017){
     t <- paste("select * from par_set where autolink = 1 and Year=",y,sep="")
@@ -134,25 +142,41 @@ par_set <- par_set %>%
         autolink_check <- rbind(autolink_check, s1)
       }
     }
-  } 
-#create a dummy region connection list to compare against the partial data 
-  regions_int <- data.frame()
-  for (a in 1:189){
-    for (i in 1:189){
+  }
+  remove(y,t,test,r,s1)
+#autolink for region 176 is missing for year 1991-1996
+  #add as links with intensitiy 0 
+  autolink_add <- data.frame(Year=1991:1996, Region_A=176, c1=1, 
+                             Region_B=176, c2=0, Intensity=0)
+  
+#create a internal dummy region connection list country 1 to compare against the partial data 
+  regions_int_c1 <- data.frame()
+  for (a in regions_c1){
+    for (i in regions_c1){
       c <- expand.grid(i,a)
-      #if(c$Var1 != c$Var2) {
         if(c$Var1 < c$Var2){
-          regions_int <- rbind(regions_int, c)        
+          regions_int_c1 <- rbind(regions_int_c1, c)        
         }
       }
     }
-  #}
   remove(a,i,c)
 
-#create a dummy region list for cross-border conncetions to compare against the partial data
+#create a internal dummy region connection list country 2 to compare against the partial data 
+  regions_int_c2 <- data.frame()
+  for (a in regions_c2){
+    for (i in regions_c2){
+      c <- expand.grid(i,a)
+      if(c$Var1 < c$Var2){
+        regions_int_c2 <- rbind(regions_int_c2, c)        
+      }
+    }
+  }
+  remove(a,i,c)
+  
+#create a dummy internal region list for cross-border conncetions to compare against the partial data
   regions_ext <- data.frame()
-  for (a in 1:189){
-    for (i in 190:378){
+  for (a in regions_c2){
+    for (i in regions_c1){
       c <- expand.grid(a,i)
           regions_ext <- rbind(regions_ext, c)        
         }
@@ -160,21 +184,27 @@ par_set <- par_set %>%
   remove(a,i,c)
   
 #test for duplicates in dummy lists (Should return TRUE)
-  regions_int$edge1 <- paste(regions_int$Var1, "-", regions_int$Var2, sep="")
-  regions_int$edge2 <- paste(regions_int$Var2, "-", regions_int$Var1, sep="")
-  test1 <- sqldf("select edge1 from regions_int except select edge2 from regions_int")
-    regions_ext$edge1 <- paste(regions_ext$Var1, "-", regions_ext$Var2, sep="")
-    regions_ext$edge2 <- paste(regions_ext$Var2, "-", regions_ext$Var1, sep="")
-    test2 <- sqldf("select edge1 from regions_int except select edge2 from regions_ext")
-      paste("Internal region list has no duplicate rows:", nrow(regions_int)==nrow(test1))
-      paste("External region list has no duplicate rows:", nrow(regions_ext)==nrow(test2))
-      remove(test1,test2)
+  regions_int_c1$edge1 <- paste(regions_int_c1$Var1, "-", regions_int_c1$Var2, sep="")
+  regions_int_c1$edge2 <- paste(regions_int_c1$Var2, "-", regions_int_c1$Var1, sep="")
+  test1 <- sqldf("select edge1 from regions_int_c1 except select edge2 from regions_int_c1")
+    regions_int_c2$edge1 <- paste(regions_int_c2$Var1, "-", regions_int_c2$Var2, sep="")
+    regions_int_c2$edge2 <- paste(regions_int_c2$Var2, "-", regions_int_c2$Var1, sep="")
+    test2 <- sqldf("select edge1 from regions_int_c2 except select edge2 from regions_int_c2")
+      regions_ext$edge1 <- paste(regions_ext$Var1, "-", regions_ext$Var2, sep="")
+      regions_ext$edge2 <- paste(regions_ext$Var2, "-", regions_ext$Var1, sep="")
+      test3 <- sqldf("select edge1 from regions_ext except select edge2 from regions_ext")
+        paste("Internal region list c1 has no duplicate rows:", nrow(regions_int_c1)==nrow(test1))
+        paste("Internal region list c2 has no duplicate rows:", nrow(regions_int_c2)==nrow(test2))
+        paste("External region list has no duplicate rows:", nrow(regions_ext)==nrow(test3))
+        remove(test1,test2,test3)
 
 #add rows to par_set
-full_set <- select (par_set,c(Year, rid1, c1, rid2, c2,Intensity))
+full_set <- select (par_set,c(Year, Region_A, c1, Region_B, c2,Intensity))
+#add autolinks 
+full_set <- rbind(full_set, autolink_add)
 #country 1: internal
   for (y in 1991:2017) {
-    t <- paste("select edge1 from regions_int  
+    t <- paste("select edge1 from regions_int_c1  
                 except 
                   select edge1 from par_set where Year=",y," and c1=1 and c2=0 
                     union 
@@ -183,14 +213,14 @@ full_set <- select (par_set,c(Year, rid1, c1, rid2, c2,Intensity))
     test <- sqldf(t)
     a <- paste("select ",y," as Year, Var1 as rid1, 1 as c1, 
                   Var2 as rid2, 0 as c2,0 as Intensity
-                  from regions_int where edge1 in 
+                  from regions_int_c1 where edge1 in 
                   (select edge1 from test)")
     addrow <- sqldf(a)
     full_set <- rbind(full_set, addrow)
   }
   #country 2: internal
     for (y in 1991:2017) {
-      t <- paste("select edge1 from regions_int  
+      t <- paste("select edge1 from regions_int_c2  
                   except 
                     select edge1 from par_set where Year=",y," and c1=0 and c2=1 
                       union 
@@ -199,7 +229,7 @@ full_set <- select (par_set,c(Year, rid1, c1, rid2, c2,Intensity))
       test <- sqldf(t)
       a <- paste("select ",y," as Year, Var1 as rid1, 0 as c1, 
                     Var2 as rid2, 1 as c2,0 as Intensity
-                    from regions_int where edge1 in 
+                    from regions_int_c2 where edge1 in 
                     (select edge1 from test)")
       addrow <- sqldf(a)
       full_set <- rbind(full_set, addrow)
@@ -220,7 +250,7 @@ full_set <- select (par_set,c(Year, rid1, c1, rid2, c2,Intensity))
         addrow <- sqldf(a)
         full_set <- rbind(full_set, addrow)
       }
-      remove(t,y,a,test,addrow, regions_int, regions_ext)
+      remove(t,y,a,test,addrow, regions_int_c1, regions_int_c2,regions_ext)
 
 #add dummies for autolink (region connected to itself) and links across borders
   full_set <- full_set %>%
