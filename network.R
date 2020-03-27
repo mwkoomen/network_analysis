@@ -524,7 +524,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
        deg.dist22_1,deg.dist22_2,deg.dist22_3,deg.dist22_4,deg.dist22_5,deg.dist22_6       
       )
         
-  # Compute and plot degree centrality [normalized] [unweighted] (works) --------------------------------------
+  # Compute and plot degree centrality [normalized] [unweighted] --------------------------------------
     nodes_c1 <- data.frame(ID=regions_c1)
     nodes_c2 <- data.frame(ID=regions_c2)
     nodes_c1c2 <- data.frame(ID=regions_c1c2)
@@ -558,7 +558,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   }
   remove(x,i,s,links, nodes_c1,nodes_c2, nodes_c1c2, net, n)
 
-    # Compile Degree Centrality (works) -----------------------------------------------
+    # Compile Degree Centrality -----------------------------------------------
   #compile degree centrality  
   year <- c(1991:2017)
   #country 1: internal
@@ -653,7 +653,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   degree_centrality22 <- data.frame(year, cn)
   remove(year, cn)
 
-    # Plot Degree Centrality [normalized] (works) --------------------------------------------------------------------
+    # Plot Degree Centrality [normalized] --------------------------------------------------------------------
   #plot  
   par(old.par)
   plot(degree_centrality11$year,1-degree_centrality11$cn, type = "l",col = "red", xlab = "Year", ylab = "Degree Centrality (Mean)", 
@@ -663,7 +663,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   legend(1991, 1, legend=c("C1:Internal", "C2:Internal", "C1-C2:External"),
          col=c("red", "darkgreen","blue"), lty=1, cex=0.8, bty = "n",lwd=2)  
  
-  # Compute and plot degree centrality [not normalized] [weighted] (works: needs revision) --------------------------------------
+  # Compute and plot degree centrality [normalized] [weighted] --------------------------------------
   nodes_c1 <- data.frame(ID=regions_c1)
   nodes_c2 <- data.frame(ID=regions_c2)
   nodes_c1c2 <- data.frame(ID=regions_c1c2)
@@ -699,7 +699,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   }
   remove(i,s,x,links,net,n,nodes_c1,nodes_c2,nodes_c1c2)  
 
-    # Compile Degree Centrality [normalized / weighted] (works) -----------------------------------------------
+    # Compile Degree Centrality [normalized / weighted] -----------------------------------------------
   year <- c(1991:2017)
   #country 1: internal
   degree_centrality11 <- data.frame()
@@ -732,7 +732,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   }
   remove(y,w,m,cn,d,year)
   
-    # Plot Degree Centrality [non normalized] [weighted] (works) --------------------------------------------------------------------
+    # Plot Degree Centrality [normalized / weighted] --------------------------------------------------------------------
   par(old.par)
   plot(degree_centrality22$Year,degree_centrality22$mean.Intensity_norm., type = "l",col = "red", xlab = "Year", 
        ylab = "Degree Centrality (Mean)", main = "Degree centrality [normalized / weighted]", ylim=c(0,1), lwd=2) 
@@ -741,15 +741,15 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   legend(1990, 1, legend=c("C1:Internal", "C2:Internal", "C1-C2:External"),
          col=c("darkgreen","red", "blue"), lty=1, cex=0.8, bty="n", lwd=2)  
   
-  # Compute Harmonic Centrality [unweighted] (works) ---------------------------------------------
+  # Compute Harmonic Centrality [normalized / unweighted] ---------------------------------------------
   #C1: internal
   harm_cent11 <- data.frame()
     for (i in 1991:2017){
     n <- paste("net_11_", i, sep="")
     x <- get(n)
     h <- paste("harm.cent_11_", i, sep="")
-    assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
-    d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
+    assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/126)
+    d <- data.frame(year=i, harmonic_centrality= mean(get(h)))
     harm_cent11 <- rbind(harm_cent11, d)
   }
     #C1-C2: external
@@ -758,7 +758,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
       n <- paste("net_12_", i, sep="")
       x <- get(n)
       h <- paste("harm.cent_12_", i, sep="")
-      assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
+      assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/189)
       d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
       harm_cent12 <- rbind(harm_cent12, d)
     }
@@ -768,7 +768,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         n <- paste("net_22_", i, sep="")
         x <- get(n)
         h <- paste("harm.cent_22_", i, sep="")
-        assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
+        assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/63)
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent22 <- rbind(harm_cent22, d)
       }
@@ -777,282 +777,117 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
       #plot 1  
       par(old.par)
         plot(harm_cent22, type = "l",col = "red", xlab = "Year", ylab = "Harmonic Centrality (Mean)", 
-             main = "Harmonic centrality [unweighted]", ylim=c(30,150),lwd=2) 
+             main = "Harmonic centrality [normalized / unweighted]", ylim=c(0.4,1),lwd=2) 
         lines(harm_cent11, type = "l", col = "darkgreen",lwd=2)
         lines(harm_cent12, type = "l", col = "blue",lwd=2)
-        legend(1990, 150, legend=c("C1:Internal","C2:Internal", "C1-C2:External"),
-               col=c("darkgreen","red", "blue"), lty=1, cex=0.8, bty="n", lwd=2) 
+        legend(1990, 1, legend=c("C1:Internal","C2:Internal", "C1-C2:External"),
+               col=c("darkgreen","red", "blue"), lty=NA, cex=0.8, bty="n", lwd=10, pch=21) 
 
-        #plot 2  
-        par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
-        hist(harm.cent_11_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
-        hist(harm.cent_11_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
-        hist(harm.cent_11_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
-        hist(harm.cent_11_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
-        hist(harm.cent_11_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
-        hist(harm.cent_11_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
-        mtext("Country 1: Internal links (Harmonic centrality)", 
+        #density plots             
+        b <- adjustcolor("blue", alpha.f = 0.2)
+        r <- adjustcolor("red", alpha.f = 0.2)
+        g <- adjustcolor("green", alpha.f = 0.2)
+        par(mfrow=c(2,2), oma=c(0,0,2,0))
+        plot(density(harm.cent_11_1991), xlab="", ylab="# nodes", main="Country 1: Internal links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40)) 
+        polygon(density(harm.cent_11_1991), col=r, border="black")
+        lines(density(harm.cent_11_2001), col="blue")
+        polygon(density(harm.cent_11_2001), col=b, border="black")
+        lines(density(harm.cent_11_2017), col="green")
+        polygon(density(harm.cent_11_2017), col=g, border="black")
+        
+        plot(density(harm.cent_12_1991), xlab="", ylab="", main="Country 1-2: External links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40)) 
+        polygon(density(harm.cent_12_1991), col=r, border="black")
+        lines(density(harm.cent_12_2001), col="blue")
+        polygon(density(harm.cent_12_2001), col=b, border="black")
+        lines(density(harm.cent_12_2017), col="green")
+        polygon(density(harm.cent_12_2017), col=g, border="black")
+        
+        plot(density(harm.cent_22_1991), xlab="", ylab="# nodes", main="Country 2: Internal links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40)) 
+        polygon(density(harm.cent_22_1991), col=r, border="black")
+        lines(density(harm.cent_22_2001), col="blue")
+        polygon(density(harm.cent_22_2001), col=b, border="black")
+        lines(density(harm.cent_22_2017), col="green")
+        polygon(density(harm.cent_22_2017), col=g, border="black")
+        legend(1.2, 40, legend=c("1991","2001", "2017"),
+               col=c(r,b,g), lty=NA, pch=21, cex=1.2, bty = "n", lwd=32, xpd = "NA") 
+        mtext("Harmonic Centrality [normalized / unweighted]", 
               outer=TRUE, cex=1, font=2)
         
-        par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
-        hist(harm.cent_12_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
-        hist(harm.cent_12_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
-        hist(harm.cent_12_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
-        hist(harm.cent_12_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
-        hist(harm.cent_12_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
-        hist(harm.cent_12_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
-        mtext("Country 1: External links (Harmonic centrality)", 
-              outer=TRUE, cex=1, font=2)      
-  
-        par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
-        hist(harm.cent_22_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
-        hist(harm.cent_22_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
-        hist(harm.cent_22_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
-        hist(harm.cent_22_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
-        hist(harm.cent_22_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
-        hist(harm.cent_22_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
-        mtext("Country 2: Internal links (Harmonic centrality)", 
-              outer=TRUE, cex=1, font=2)      
-        
-  # Compute Harmonic Centrality [weighted] (works) ---------------------------------------------
+  # Compute Harmonic Centrality [normalized / weighted] (needs some revision in normalizing) ---------------------------------------------
         #C1: internal
         harm_cent11 <- data.frame()
-        for (i in 1991:2017){
-          n <- paste("net_11_", i, sep="")
+        for (y in 1991:2017){
+          n <- paste("net_11_", y, sep="")
           x <- get(n)
-          h <- paste("harm.cent_11_", i, sep="")
-          assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
-          d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
+          h <- paste("harm.cent_11_", y, sep="")
+          assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/126)
+          d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent11 <- rbind(harm_cent11, d)
         }
-        #C1: external
+        #C1-C2: external
         harm_cent12 <- data.frame()
-        for (i in 1991:2017){
-          n <- paste("net_12_", i, sep="")
+        for (y in 1991:2017){
+          n <- paste("net_12_", y, sep="")
           x <- get(n)
-          h <- paste("harm.cent_12_", i, sep="")
-          assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
-          d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
+          h <- paste("harm.cent_12_", y, sep="")
+          assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/189)
+          d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent12 <- rbind(harm_cent12, d)
         }
         #C2: internal
         harm_cent22 <- data.frame()
-        for (i in 1991:2017){
-          n <- paste("net_22_", i, sep="")
+        for (y in 1991:2017){
+          n <- paste("net_22_", y, sep="")
           x <- get(n)
-          h <- paste("harm.cent_22_", i, sep="")
-          assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
-          d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
+          h <- paste("harm.cent_22_", y, sep="")
+          assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/63)
+          d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent22 <- rbind(harm_cent22, d)
         }
-        #C2: external      
-        harm_cent21 <- data.frame()
-        for (i in 1991:2017){
-          n <- paste("net_21_", i, sep="")
-          x <- get(n)
-          h <- paste("harm.cent_21_", i, sep="")
-          assign(h, harmonic_centrality(x, mode = "all", weights = E(x)$w1))
-          d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
-          harm_cent21 <- rbind(harm_cent21, d)
-        } 
-        harm_cent11$link <- "Country 1: Internal"
-        harm_cent12$link <- "Country 1: External"      
-        harm_cent22$link <- "Country 2: Internal"
-        harm_cent21$link <- "Country 2: External"
-        harm_cent <- rbind(harm_cent11, harm_cent12, harm_cent22, harm_cent21)
-        
-        p <- ggplot(harm_cent, aes(year, harmonic_centrality))
-        p +  ggtitle("Harmonic Centrality [weigted]") + 
-          theme(plot.title = element_text(hjust = 0.5)) +
-          geom_point(aes(colour = factor(link)))
-        
+        #plot 1  
         par(old.par)
-        plot(harm_cent22, type = "o",col = "red", xlab = "Year", ylab = "Harmonic Centrality (Mean)", 
-             main = "Harmonic centrality (Mean)", ylim=c(0,30)) 
-        lines(harm_cent21, type = "o", col = "blue") 
-        lines(harm_cent11, type = "o", col = "darkgreen")
-        lines(harm_cent12, type = "o", col = "orange")
-        legend(1991, 30, legend=c("C2:Internal", "C2:External", "C1:Internal", "C1:External"),
-               col=c("red", "blue", "darkgreen", "orange"), lty=1:2, cex=0.8) 
-  
-  #density plots             
+        plot(harm_cent22, type = "l",col = "red", xlab = "Year", ylab = "Harmonic Centrality (Mean)", 
+             main = "Harmonic centrality [normalized / weighted]", ylim=c(0.4,1),lwd=2) 
+        lines(harm_cent11, type = "l", col = "darkgreen",lwd=2)
+        lines(harm_cent12, type = "l", col = "blue",lwd=2)
+        legend(1990, 1, legend=c("C1:Internal","C2:Internal", "C1-C2:External"),
+               col=c("darkgreen","red", "blue"), lty=NA, cex=0.8, bty="n", lwd=10, pch=21) 
+        
+        #density plots             
+        b <- adjustcolor("blue", alpha.f = 0.2)
+        r <- adjustcolor("red", alpha.f = 0.2)
+        g <- adjustcolor("green", alpha.f = 0.2)
         par(mfrow=c(2,2), oma=c(0,0,2,0))
-        plot(density(harm.cent_11_1991), xlab="", ylab="density", main="Country 1: Internal links", cex=0.8, 
-             col="red", xlim = c(0,60),ylim=c(0,0.4)) 
-        polygon(density(harm.cent_11_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
+        plot(density(harm.cent_11_1991), xlab="", ylab="# nodes", main="Country 1: Internal links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40)) 
+        polygon(density(harm.cent_11_1991), col=r, border="black")
         lines(density(harm.cent_11_2001), col="blue")
-        polygon(density(harm.cent_11_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
+        polygon(density(harm.cent_11_2001), col=b, border="black")
         lines(density(harm.cent_11_2017), col="green")
-        polygon(density(harm.cent_11_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
+        polygon(density(harm.cent_11_2017), col=g, border="black")
         
-        plot(density(harm.cent_12_1991), xlab="", ylab="density", main="Country 1: External links", cex=0.8, 
-             col="red", xlim = c(0,60),ylim=c(0,0.4)) 
-        polygon(density(harm.cent_12_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
+        plot(density(harm.cent_12_1991), xlab="", ylab="", main="Country 1-2: External links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40)) 
+        polygon(density(harm.cent_12_1991), col=r, border="black")
         lines(density(harm.cent_12_2001), col="blue")
-        polygon(density(harm.cent_12_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
+        polygon(density(harm.cent_12_2001), col=b, border="black")
         lines(density(harm.cent_12_2017), col="green")
-        polygon(density(harm.cent_12_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
+        polygon(density(harm.cent_12_2017), col=g, border="black")
         
-        plot(density(harm.cent_22_1991), xlab="", ylab="density", main="Country 2: Internal links", cex=0.8, 
-             col="red", xlim = c(0,60),ylim=c(0,0.4)) 
-        polygon(density(harm.cent_22_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
+        plot(density(harm.cent_22_1991), xlab="", ylab="# nodes", main="Country 2: Internal links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40)) 
+        polygon(density(harm.cent_22_1991), col=r, border="black")
         lines(density(harm.cent_22_2001), col="blue")
-        polygon(density(harm.cent_22_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
+        polygon(density(harm.cent_22_2001), col=b, border="black")
         lines(density(harm.cent_22_2017), col="green")
-        polygon(density(harm.cent_22_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
-        
-        plot(density(harm.cent_21_1991), xlab="", ylab="density", main="Country 2: External links", cex=0.8, 
-             col="red", xlim = c(0,60),ylim=c(0,0.4)) 
-        polygon(density(harm.cent_21_1991), col=adjustcolor("red", alpha.f = 0.2), border="black")
-        lines(density(harm.cent_21_2001), col="blue")
-        polygon(density(harm.cent_21_2001), col=adjustcolor("blue", alpha.f = 0.2), border="black")
-        lines(density(harm.cent_21_2017), col="green")
-        polygon(density(harm.cent_21_2017), col=adjustcolor("green", alpha.f = 0.2), border="black")
-     
-        mtext("Harmonic Centrality [Weighted]", 
+        polygon(density(harm.cent_22_2017), col=g, border="black")
+        legend(1.2, 40, legend=c("1991","2001", "2017"),
+               col=c(r,b,g), lty=NA, pch=21, cex=1.2, bty = "n", lwd=32, xpd = "NA") 
+        mtext("Harmonic Centrality [normalized / weighted]", 
               outer=TRUE, cex=1, font=2)
-  
-  #number plot 
-        #country 1
-        t1a <- sort(harm.cent_11_1991)
-        t1a <- data.frame(num=1:189, harmonic_centrality=t1a)
-        t1b <- sort(harm.cent_12_1991)
-        t1b <- data.frame(num=1:189, harmonic_centrality=t1b)      
-        t2a <- sort(harm.cent_11_1996)
-        t2a <- data.frame(num=1:189, harmonic_centrality=t2a)
-        t2b <- sort(harm.cent_12_1996)
-        t2b <- data.frame(num=1:189, harmonic_centrality=t2b)      
-        t3a <- sort(harm.cent_11_2001)
-        t3a <- data.frame(num=1:189, harmonic_centrality=t3a)
-        t3b <- sort(harm.cent_12_2001)
-        t3b <- data.frame(num=1:189, harmonic_centrality=t3b)      
-        t4a <- sort(harm.cent_11_2006)
-        t4a <- data.frame(num=1:189, harmonic_centrality=t4a)
-        t4b <- sort(harm.cent_12_2006)
-        t4b <- data.frame(num=1:189, harmonic_centrality=t4b)      
-        t5a <- sort(harm.cent_11_2011)
-        t5a <- data.frame(num=1:189, harmonic_centrality=t5a)
-        t5b <- sort(harm.cent_12_2011)
-        t5b <- data.frame(num=1:189, harmonic_centrality=t5b)      
-        t6a <- sort(harm.cent_11_2017)
-        t6a <- data.frame(num=1:189, harmonic_centrality=t6a)
-        t6b <- sort(harm.cent_12_2017)
-        t6b <- data.frame(num=1:189, harmonic_centrality=t6b)      
-        
-        par(mfrow=c(2,3), oma = c(0,2,2,0))
-        plot(t1a, ylim=c(0,210), xlab="1991", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t1b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        legend(1,200,legend=c("Internal", "External"),col=c("blue", "red"), lty=1, cex=0.9, bty="n") 
-        
-        plot(t2a, ylim=c(0,210), xlab="1996", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t2b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t3a, ylim=c(0,210), xlab="2001", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t3b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t4a, ylim=c(0,210), xlab="2006", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t4b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t5a, ylim=c(0,210), xlab="2011", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t5b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t6a, ylim=c(0,210), xlab="2017", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t6b, ylim=c(0,210), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        mtext("Country 1: Harmonic Centrality [weighted] per vertex", 
-              outer=TRUE, cex=0.9, font=2)
-        
-        #country 2
-        t1a <- sort(harm.cent_21_1991)
-        t1a <- data.frame(num=1:189, harmonic_centrality=t1a)
-        t1b <- sort(harm.cent_22_1991)
-        t1b <- data.frame(num=1:189, harmonic_centrality=t1b)      
-        t2a <- sort(harm.cent_21_1996)
-        t2a <- data.frame(num=1:189, harmonic_centrality=t2a)
-        t2b <- sort(harm.cent_22_1996)
-        t2b <- data.frame(num=1:189, harmonic_centrality=t2b)      
-        t3a <- sort(harm.cent_21_2001)
-        t3a <- data.frame(num=1:189, harmonic_centrality=t3a)
-        t3b <- sort(harm.cent_22_2001)
-        t3b <- data.frame(num=1:189, harmonic_centrality=t3b)      
-        t4a <- sort(harm.cent_21_2006)
-        t4a <- data.frame(num=1:189, harmonic_centrality=t4a)
-        t4b <- sort(harm.cent_22_2006)
-        t4b <- data.frame(num=1:189, harmonic_centrality=t4b)      
-        t5a <- sort(harm.cent_21_2011)
-        t5a <- data.frame(num=1:189, harmonic_centrality=t5a)
-        t5b <- sort(harm.cent_22_2011)
-        t5b <- data.frame(num=1:189, harmonic_centrality=t5b)      
-        t6a <- sort(harm.cent_21_2017)
-        t6a <- data.frame(num=1:189, harmonic_centrality=t6a)
-        t6b <- sort(harm.cent_22_2017)
-        t6b <- data.frame(num=1:189, harmonic_centrality=t6b)      
-        
-        par(mfrow=c(2,3), oma = c(0, 2, 2, 0))
-        plot(t1a, ylim=c(0,100), xlab="1991", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t1b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        legend(1,100,legend=c("Internal", "External"),col=c("blue", "red"), lty=1, cex=0.9, bty="n") 
-        
-        plot(t2a, ylim=c(0,100), xlab="1996", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t2b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t3a, ylim=c(0,100), xlab="2001", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t3b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t4a, ylim=c(0,100), xlab="2006", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t4b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t5a, ylim=c(0,100), xlab="2011", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t5b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        
-        plot(t6a, ylim=c(0,100), xlab="2017", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
-        lines(t6b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
-        mtext("Country 2: Harmonic Centrality [weighted] per vertex", 
-              outer=TRUE, cex=0.9, font=2)
-        
-        
-  
-  #histogram      
-        par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
-        hist(harm.cent_11_1991, xlab="", ylab="", main="1991", col="darkred")
-        hist(harm.cent_11_1996, xlab="", ylab="", main="1996", col="darkred")
-        hist(harm.cent_11_2001, xlab="", ylab="", main="2001", col="darkred")
-        hist(harm.cent_11_2006, xlab="", ylab="", main="2006", col="darkred")
-        hist(harm.cent_11_2011, xlab="", ylab="", main="2011", col="darkred")
-        hist(harm.cent_11_2017, xlab="", ylab="", main="2017", col="darkred")
-        mtext("Country 1: Internal links (Harmonic centrality)", 
-              outer=TRUE, cex=1, font=2)      
-        
-              
-        par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
-        hist(harm.cent_12_1991, xlab="", ylab="", main="1991", col="darkred")
-        hist(harm.cent_12_1996, xlab="", ylab="", main="1996", col="darkred")
-        hist(harm.cent_12_2001, xlab="", ylab="", main="2001", col="darkred")
-        hist(harm.cent_12_2006, xlab="", ylab="", main="2006", col="darkred")
-        hist(harm.cent_12_2011, xlab="", ylab="", main="2011", col="darkred")
-        hist(harm.cent_12_2017, xlab="", ylab="", main="2017", col="darkred")
-        mtext("Country 1: External links (Harmonic centrality)", 
-              outer=TRUE, cex=1, font=2)      
-        
-        par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
-        hist(harm.cent_22_1991, xlab="", ylab="", main="1991", col="darkred")
-        hist(harm.cent_22_1996, xlab="", ylab="", main="1996", col="darkred")
-        hist(harm.cent_22_2001, xlab="", ylab="", main="2001", col="darkred")
-        hist(harm.cent_22_2006, xlab="", ylab="", main="2006", col="darkred")
-        hist(harm.cent_22_2011, xlab="", ylab="", main="2011", col="darkred")
-        hist(harm.cent_22_2017, xlab="", ylab="", main="2017", col="darkred")
-        mtext("Country 2: Internal links (Harmonic centrality)", 
-              outer=TRUE, cex=1, font=2)      
-        
-        par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
-        hist(harm.cent_21_1991, xlab="", ylab="", main="1991", col="darkred")
-        hist(harm.cent_21_1996, xlab="", ylab="", main="1996", col="darkred")
-        hist(harm.cent_21_2001, xlab="", ylab="", main="2001", col="darkred")
-        hist(harm.cent_21_2006, xlab="", ylab="", main="2006", col="darkred")
-        hist(harm.cent_21_2011, xlab="", ylab="", main="2011", col="darkred")
-        hist(harm.cent_21_2017, xlab="", ylab="", main="2017", col="darkred")
-        mtext("Country 2: External links (Harmonic centrality)", 
-              outer=TRUE, cex=1, font=2)      
-        
         
   # Fixed effects regressions ------------------------------------------------
     #Intensity ~ border (just with year) 
@@ -2460,5 +2295,152 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
       lines(dc_int1, type = "o", col = "blue") 
       legend(1991, 0.25, legend=c("C2:Internal + External", "C1:Internal + External"),
              col=c("red", "blue"), lty=1:2, cex=0.8)  
+      
+      
+      # Other stuff--------------------------------------------------
+      #plot 2  
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_11_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_11_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_11_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_11_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_11_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_11_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 1: Internal links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)
+      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_12_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_12_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_12_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_12_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_12_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_12_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 1: External links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_22_1991, xlim=c(0,120), xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_22_1996, xlim=c(0,120), xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_22_2001, xlim=c(0,120), xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_22_2006, xlim=c(0,120), xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_22_2011, xlim=c(0,120), xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_22_2017, xlim=c(0,120), xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 2: Internal links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+      #sorted histogram plot 
+      #country 1
+      t1a <- sort(harm.cent_11_1991)
+      t1a <- data.frame(num=1:126, harmonic_centrality=t1a)
+      t2a <- sort(harm.cent_11_1996)
+      t2a <- data.frame(num=1:126, harmonic_centrality=t2a)
+      t3a <- sort(harm.cent_11_2001)
+      t3a <- data.frame(num=1:126, harmonic_centrality=t3a)
+      t4a <- sort(harm.cent_11_2006)
+      t4a <- data.frame(num=1:126, harmonic_centrality=t4a)
+      t5a <- sort(harm.cent_11_2011)
+      t5a <- data.frame(num=1:126, harmonic_centrality=t5a)
+      t6a <- sort(harm.cent_11_2017)
+      t6a <- data.frame(num=1:126, harmonic_centrality=t6a)
+      
+      par(mfrow=c(2,3), oma = c(0,2,2,0))
+      plot(t1a, ylim=c(0,210), xlab="1991", ylab="Harmonic Centrality", type="h", col=b)
+      plot(t2a, ylim=c(0,210), xlab="1996", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      plot(t3a, ylim=c(0,210), xlab="2001", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      plot(t4a, ylim=c(0,210), xlab="2006", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      plot(t5a, ylim=c(0,210), xlab="2011", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      plot(t6a, ylim=c(0,210), xlab="2017", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      mtext("Country 1: Harmonic Centrality [weighted] per vertex", 
+            outer=TRUE, cex=0.9, font=2)
+      
+      #country 2
+      t1a <- sort(harm.cent_21_1991)
+      t1a <- data.frame(num=1:189, harmonic_centrality=t1a)
+      t1b <- sort(harm.cent_22_1991)
+      t1b <- data.frame(num=1:189, harmonic_centrality=t1b)      
+      t2a <- sort(harm.cent_21_1996)
+      t2a <- data.frame(num=1:189, harmonic_centrality=t2a)
+      t2b <- sort(harm.cent_22_1996)
+      t2b <- data.frame(num=1:189, harmonic_centrality=t2b)      
+      t3a <- sort(harm.cent_21_2001)
+      t3a <- data.frame(num=1:189, harmonic_centrality=t3a)
+      t3b <- sort(harm.cent_22_2001)
+      t3b <- data.frame(num=1:189, harmonic_centrality=t3b)      
+      t4a <- sort(harm.cent_21_2006)
+      t4a <- data.frame(num=1:189, harmonic_centrality=t4a)
+      t4b <- sort(harm.cent_22_2006)
+      t4b <- data.frame(num=1:189, harmonic_centrality=t4b)      
+      t5a <- sort(harm.cent_21_2011)
+      t5a <- data.frame(num=1:189, harmonic_centrality=t5a)
+      t5b <- sort(harm.cent_22_2011)
+      t5b <- data.frame(num=1:189, harmonic_centrality=t5b)      
+      t6a <- sort(harm.cent_21_2017)
+      t6a <- data.frame(num=1:189, harmonic_centrality=t6a)
+      t6b <- sort(harm.cent_22_2017)
+      t6b <- data.frame(num=1:189, harmonic_centrality=t6b)      
+      
+      par(mfrow=c(2,3), oma = c(0, 2, 2, 0))
+      plot(t1a, ylim=c(0,100), xlab="1991", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t1b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      legend(1,100,legend=c("Internal", "External"),col=c("blue", "red"), lty=1, cex=0.9, bty="n") 
+      
+      plot(t2a, ylim=c(0,100), xlab="1996", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t2b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t3a, ylim=c(0,100), xlab="2001", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t3b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t4a, ylim=c(0,100), xlab="2006", ylab="Harmonic Centrality", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t4b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t5a, ylim=c(0,100), xlab="2011", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t5b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      
+      plot(t6a, ylim=c(0,100), xlab="2017", ylab="", type="h", col=adjustcolor("blue", alpha.f = 0.2))
+      lines(t6b, ylim=c(0,100), xlab="", ylab="", type="h", col=adjustcolor("red", alpha.f = 0.2)) 
+      mtext("Country 2: Harmonic Centrality [weighted] per vertex", 
+            outer=TRUE, cex=0.9, font=2)
+      
+      #histogram      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_11_1991, xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_11_1996, xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_11_2001, xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_11_2006, xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_11_2011, xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_11_2017, xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 1: Internal links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+      
+      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_12_1991, xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_12_1996, xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_12_2001, xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_12_2006, xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_12_2011, xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_12_2017, xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 1: External links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_22_1991, xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_22_1996, xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_22_2001, xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_22_2006, xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_22_2011, xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_22_2017, xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 2: Internal links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
+      
+      par(mfrow=c(2,3), oma = c(0, 0, 2, 0))
+      hist(harm.cent_21_1991, xlab="", ylab="", main="1991", col="darkred")
+      hist(harm.cent_21_1996, xlab="", ylab="", main="1996", col="darkred")
+      hist(harm.cent_21_2001, xlab="", ylab="", main="2001", col="darkred")
+      hist(harm.cent_21_2006, xlab="", ylab="", main="2006", col="darkred")
+      hist(harm.cent_21_2011, xlab="", ylab="", main="2011", col="darkred")
+      hist(harm.cent_21_2017, xlab="", ylab="", main="2017", col="darkred")
+      mtext("Country 2: External links (Harmonic centrality)", 
+            outer=TRUE, cex=1, font=2)      
       
       
