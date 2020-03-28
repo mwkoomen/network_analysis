@@ -326,6 +326,7 @@ regions_c1c2 <- c(regions_c1,regions_c2)
   
   
   
+  
 #### DATA ANALYSIS -----------------------------------------------------------------------------------
   # Partial set link intensity plot -----------------------------------------
 #This code block will plot the link intesity per country (internal/external) per year using partial data
@@ -528,6 +529,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     nodes_c1 <- data.frame(ID=regions_c1)
     nodes_c2 <- data.frame(ID=regions_c2)
     nodes_c1c2 <- data.frame(ID=regions_c1c2)
+    dc <- data.frame()
     
   #Country 1: Internal links 
   for (i in 1991:2017) {
@@ -537,6 +539,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c1, directed = F)
     n <- paste("deg.cent_11_", i, sep="")
     assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
+    d <- data.frame(ID=regions_c1, Year=i, c1=1, c2=0, border=0, dc=get(n)$res/126)
+    dc <- rbind(dc, d)
   }
   #Country 1-2: External links  
   for (i in 1991:2017) {
@@ -546,6 +550,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c1c2, directed = F)
     n <- paste("deg.cent_12_", i, sep="")
     assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
+    d <- data.frame(ID=regions_c1c2, Year=i, c1=1, c2=1, border=1, dc=get(n)$res/189)
+    dc <- rbind(dc, d)    
   }
   #Country 2: Internal links  
   for (i in 1991:2017) {
@@ -555,9 +561,11 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c2, directed = F)
     n <- paste("deg.cent_22_", i, sep="")
     assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
+    d <- data.frame(ID=regions_c2, Year=i, c1=0, c2=1, border=0, dc=get(n)$res/63)
+    dc <- rbind(dc, d)
   }
-  remove(x,i,s,links, nodes_c1,nodes_c2, nodes_c1c2, net, n)
-
+  remove(x,i,s,links,nodes_c1,nodes_c2,nodes_c1c2,net,n,d)
+  
     # Compile Degree Centrality -----------------------------------------------
   #compile degree centrality  
   year <- c(1991:2017)
@@ -667,6 +675,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   nodes_c1 <- data.frame(ID=regions_c1)
   nodes_c2 <- data.frame(ID=regions_c2)
   nodes_c1c2 <- data.frame(ID=regions_c1c2)
+  dc_w <- data.frame()
   
   #Country 1: Internal links 
   for (i in 1991:2017) {
@@ -676,6 +685,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c1, directed = F)
     n <- paste("deg.cent_11_", i, sep="")
     assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
+    d <- data.frame(ID=regions_c1, Year=i, c1=1, c2=0, border=0, dcw=get(n)/126)
+    dc_w <- rbind(dc_w, d)
   }
   #Country 1-2: External links
   nodes <- data.frame(ID=1:378)
@@ -686,6 +697,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c1c2, directed = F)
     n <- paste("deg.cent_12_", i, sep="")
     assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
+    d <- data.frame(ID=regions_c1c2, Year=i, c1=1, c2=1, border=1, dcw=get(n)/189)
+    dc_w <- rbind(dc_w, d)
   }
   #Country 2: Internal links
   nodes <- data.frame(ID=190:378)
@@ -696,53 +709,54 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c2, directed = F)
     n <- paste("deg.cent_22_", i, sep="")
     assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
+    d <- data.frame(ID=regions_c2, Year=i, c1=0, c2=1, border=0, dcw=get(n)/63)
+    dc_w <- rbind(dc_w, d)
   }
-  remove(i,s,x,links,net,n,nodes_c1,nodes_c2,nodes_c1c2)  
+  remove(i,s,x,links,net,n,nodes_c1,nodes_c2,nodes_c1c2,d)  
 
     # Compile Degree Centrality [normalized / weighted] -----------------------------------------------
   year <- c(1991:2017)
   #country 1: internal
   degree_centrality11 <- data.frame()
   for (y in year){
-    w <- 126*(1+par_set %>% filter(c1==1, c2==0, Year==y) %>% summarise(mean(Intensity_norm)))
     m <- paste("deg.cent_11_",y,sep="" )
-    cn <- mean(get(m))/w
+    cn <- mean(get(m))/126
     d <- data.frame(Year=y, Degree=cn)
     degree_centrality11 <- rbind(degree_centrality11,d)
   }
-  remove(y,w,m,cn,d)
+  remove(y,m,cn,d)
   #country 1-2: external
   degree_centrality12 <- data.frame()
   for (y in year){
-    w <- 189*(1+par_set %>% filter(c1==1, c2==1, Year==y) %>% summarise(mean(Intensity_norm)))
     m <- paste("deg.cent_12_",y,sep="" )
-    cn <- mean(get(m))/w
+    cn <- mean(get(m))/189
     d <- data.frame(Year=y, Degree=cn)
     degree_centrality12 <- rbind(degree_centrality12,d)
   }
-  remove(y,w,m,cn,d)
+  remove(y,m,cn,d)
   #country 2: internal
   degree_centrality22 <- data.frame()
   for (y in year){
-    w <- 63*(1+par_set %>% filter(c1==0, c2==1, Year==y) %>% summarise(mean(Intensity_norm)))
     m <- paste("deg.cent_22_",y,sep="" )
-    cn <- mean(get(m))/w
+    cn <- mean(get(m))/63
     d <- data.frame(Year=y, Degree=cn)
     degree_centrality22 <- rbind(degree_centrality22,d)
   }
-  remove(y,w,m,cn,d,year)
+  remove(y,m,cn,d,year)
   
     # Plot Degree Centrality [normalized / weighted] --------------------------------------------------------------------
   par(old.par)
-  plot(degree_centrality22$Year,degree_centrality22$mean.Intensity_norm., type = "l",col = "red", xlab = "Year", 
+  plot(degree_centrality22$Year,degree_centrality22$Degree, type = "l",col = "red", xlab = "Year", 
        ylab = "Degree Centrality (Mean)", main = "Degree centrality [normalized / weighted]", ylim=c(0,1), lwd=2) 
-  lines(degree_centrality11$Year, degree_centrality11$mean.Intensity_norm., type = "l", col = "darkgreen", lwd=2)
-  lines(degree_centrality12$Year, degree_centrality12$mean.Intensity_norm., type = "l", col = "blue", lwd=2)
+  lines(degree_centrality11$Year, degree_centrality11$Degree, type = "l", col = "darkgreen", lwd=2)
+  lines(degree_centrality12$Year, degree_centrality12$Degree, type = "l", col = "blue", lwd=2)
   legend(1990, 1, legend=c("C1:Internal", "C2:Internal", "C1-C2:External"),
          col=c("darkgreen","red", "blue"), lty=1, cex=0.8, bty="n", lwd=2)  
   
   # Compute Harmonic Centrality [normalized / unweighted] ---------------------------------------------
   #C1: internal
+  hc <- data.frame()
+  
   harm_cent11 <- data.frame()
     for (i in 1991:2017){
     n <- paste("net_11_", i, sep="")
@@ -751,6 +765,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/126)
     d <- data.frame(year=i, harmonic_centrality= mean(get(h)))
     harm_cent11 <- rbind(harm_cent11, d)
+    d1 <- data.frame(ID=regions_c1,Year=i, c1=1, c2=0, border=0, hc=get(h))
+    hc <- rbind(hc,d1)
   }
     #C1-C2: external
     harm_cent12 <- data.frame()
@@ -761,6 +777,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
       assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/189)
       d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
       harm_cent12 <- rbind(harm_cent12, d)
+      d1 <- data.frame(ID=regions_c1c2,Year=i, c1=1, c2=1, border=1, hc=get(h))
+      hc <- rbind(hc,d1)      
     }
       #C2: internal
       harm_cent22 <- data.frame()
@@ -771,8 +789,10 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/63)
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent22 <- rbind(harm_cent22, d)
+        d1 <- data.frame(ID=regions_c2,Year=i, c1=0, c2=1, border=0, hc=get(h))
+        hc <- rbind(hc,d1)        
       }
-      remove(x,i,n,h,d)
+      remove(x,i,n,h,d,d1)
 
       #plot 1  
       par(old.par)
@@ -816,8 +836,10 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         mtext("Harmonic Centrality [normalized / unweighted]", 
               outer=TRUE, cex=1, font=2)
         
-  # Compute Harmonic Centrality [normalized / weighted] (needs some revision in normalizing) ---------------------------------------------
+  # Compute Harmonic Centrality [normalized / weighted] ---------------------------------------------
         #C1: internal
+        hc_w <- data.frame()
+        
         harm_cent11 <- data.frame()
         for (y in 1991:2017){
           n <- paste("net_11_", y, sep="")
@@ -826,6 +848,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/126)
           d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent11 <- rbind(harm_cent11, d)
+          d1 <- data.frame(ID=regions_c1,Year=y, c1=1, c2=0, border=0, hcw=get(h))
+          hc_w <- rbind(hc_w,d1)          
         }
         #C1-C2: external
         harm_cent12 <- data.frame()
@@ -836,6 +860,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/189)
           d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent12 <- rbind(harm_cent12, d)
+          d1 <- data.frame(ID=regions_c1c2,Year=y, c1=1, c2=1, border=1, hcw=get(h))
+          hc_w <- rbind(hc_w,d1)            
         }
         #C2: internal
         harm_cent22 <- data.frame()
@@ -846,7 +872,11 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/63)
           d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent22 <- rbind(harm_cent22, d)
+          d1 <- data.frame(ID=regions_c2,Year=y, c1=0, c2=1, border=0, hcw=get(h))
+          hc_w <- rbind(hc_w,d1)            
         }
+        remove(x,y,n,h,d,d1)
+        
         #plot 1  
         par(old.par)
         plot(harm_cent22, type = "l",col = "red", xlab = "Year", ylab = "Harmonic Centrality (Mean)", 
@@ -890,36 +920,49 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
               outer=TRUE, cex=1, font=2)
         
   # Fixed effects regressions ------------------------------------------------
-    #Intensity ~ border (just with year) 
+    #Intensity ~ border (with year and link) 
         #partial set 
-        py <- plm(Intensity_norm ~ border,
+        pyl <- plm(Intensity_norm ~ border,
                   data = par_set, 
-                  index = c("Year"),
+                  index = c("edge1", "Year"),
                   model = "within")
-        coeftest(py)
+        coeftest(pyl)
         #full set
-        fy <- plm(Intensity_norm ~ border, 
+        fyl <- plm(Intensity_norm ~ border, 
                   data = full_set,
-                  index = c("Year"), 
+                  index = c("edge1", "Year"), 
                   model = "within")
-        coeftest(fy)
+        coeftest(fyl)
+
     #Degree centrality ~ border [unweighted] 
-      dc_set$ID <- paste(dc_set$rid1.x, "-", dc_set$rid2.x, sep="")
         dc_py <- plm(dc ~ border, 
-                   data = dc_set,
-                   index = c("Year", "ID"),
+                   data = dc,
+                   index = c("Year"),
                    model = "within")
       coeftest(dc_py)
       
     #Degree centrality ~ border [weighted]
-      dc_w_py <- plm(dc ~ border, 
-                  data = dc_set_w, 
+      dc_w_py <- plm(dcw ~ border, 
+                  data = dc_w, 
                   index = c("Year"),
                   model = "within")
       coeftest(dc_w_py)     
         
+    #Degree centrality ~ border [unweighted] 
+      hc_py <- plm(hc ~ border, 
+                   data = hc,
+                   index = c("Year"),
+                   model = "within")
+      coeftest(hc_py)
       
+    #Degree centrality ~ border [weighted]
+      hc_w_py <- plm(hcw ~ border, 
+                     data = hc_w, 
+                     index = c("Year"),
+                     model = "within")
+      coeftest(hc_w_py)        
 
+      
 #### THE CODE GRAVEYARD / SCRIPTS OF THE DEAD -----------------------------------------------------------
       # TEST duplicate rows full set [No DUPLICATES!!!] -------------------------------------------------
     test_doubles <- data.frame()
