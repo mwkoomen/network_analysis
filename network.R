@@ -530,6 +530,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     nodes_c2 <- data.frame(ID=regions_c2)
     nodes_c1c2 <- data.frame(ID=regions_c1c2)
     dc <- data.frame()
+    dcb <- data.frame()
     
   #Country 1: Internal links 
   for (i in 1991:2017) {
@@ -539,19 +540,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c1, directed = F)
     n <- paste("deg.cent_11_", i, sep="")
     assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
-    d <- data.frame(ID=regions_c1, Year=i, c1=1, c2=0, border=0, dc=get(n)$res/126)
+    d <- data.frame(ID=regions_c1, Year=i, dc=get(n)$res/127) #regions +1  because of autolinks (loops)
     dc <- rbind(dc, d)
-  }
-  #Country 1-2: External links  
-  for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and border = 1")
-    x <- sqldf(s)
-    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
-    net <- graph_from_data_frame(links, nodes_c1c2, directed = F)
-    n <- paste("deg.cent_12_", i, sep="")
-    assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
-    d <- data.frame(ID=regions_c1c2, Year=i, c1=1, c2=1, border=1, dc=get(n)$res/189)
-    dc <- rbind(dc, d)    
   }
   #Country 2: Internal links  
   for (i in 1991:2017) {
@@ -561,10 +551,28 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c2, directed = F)
     n <- paste("deg.cent_22_", i, sep="")
     assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
-    d <- data.frame(ID=regions_c2, Year=i, c1=0, c2=1, border=0, dc=get(n)$res/63)
+    d <- data.frame(ID=regions_c2, Year=i, dc=get(n)$res/64)
     dc <- rbind(dc, d)
   }
-  remove(x,i,s,links,nodes_c1,nodes_c2,nodes_c1c2,net,n,d)
+  #Country 1-2: External links  
+    for (i in 1991:2017) {
+      s <- paste("select * from par_set where Year = ", i, " and border = 1")
+      x <- sqldf(s)
+      links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B)
+      net <- graph_from_data_frame(links, nodes_c1c2, directed = F)
+      n <- paste("deg.cent_12_", i, sep="")
+      assign(n, centr_degree(net, mode = "all", loops=T, normalized = T))
+      d <- data.frame(ID=regions_c1c2, Year=i, dcb=get(n)$res)
+      dcb <- rbind(dcb, d)
+    }
+    dc <- left_join(dc, dcb, by=c("ID","Year"))
+    dc <- dc %>%
+      mutate(dcb = case_when(
+        ID %in% regions_c1 ~ dcb/63,
+        ID %in% regions_c2 ~ dcb/126
+        )
+      )
+    remove(x,i,s,links,nodes_c1,nodes_c2,nodes_c1c2,net,n,d,dcb)
   
     # Compile Degree Centrality -----------------------------------------------
   #compile degree centrality  
@@ -676,6 +684,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   nodes_c2 <- data.frame(ID=regions_c2)
   nodes_c1c2 <- data.frame(ID=regions_c1c2)
   dc_w <- data.frame()
+  dcb_w <- data.frame()
   
   #Country 1: Internal links 
   for (i in 1991:2017) {
@@ -685,19 +694,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c1, directed = F)
     n <- paste("deg.cent_11_", i, sep="")
     assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
-    d <- data.frame(ID=regions_c1, Year=i, c1=1, c2=0, border=0, dcw=get(n)/126)
-    dc_w <- rbind(dc_w, d)
-  }
-  #Country 1-2: External links
-  nodes <- data.frame(ID=1:378)
-  for (i in 1991:2017) {
-    s <- paste("select * from par_set where Year = ", i, " and c1=1 and c2=1")
-    x <- sqldf(s)
-    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=1+x$Intensity_norm)
-    net <- graph_from_data_frame(links, nodes_c1c2, directed = F)
-    n <- paste("deg.cent_12_", i, sep="")
-    assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
-    d <- data.frame(ID=regions_c1c2, Year=i, c1=1, c2=1, border=1, dcw=get(n)/189)
+    d <- data.frame(ID=regions_c1, Year=i, dcw=get(n)/127) 
     dc_w <- rbind(dc_w, d)
   }
   #Country 2: Internal links
@@ -709,10 +706,29 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     net <- graph_from_data_frame(links, nodes_c2, directed = F)
     n <- paste("deg.cent_22_", i, sep="")
     assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
-    d <- data.frame(ID=regions_c2, Year=i, c1=0, c2=1, border=0, dcw=get(n)/63)
+    d <- data.frame(ID=regions_c2, Year=i, dcw=get(n)/64)
     dc_w <- rbind(dc_w, d)
   }
-  remove(i,s,x,links,net,n,nodes_c1,nodes_c2,nodes_c1c2,d)  
+  #Country 1-2: External links
+  nodes <- data.frame(ID=1:378)
+  for (i in 1991:2017) {
+    s <- paste("select * from par_set where Year = ", i, " and c1=1 and c2=1")
+    x <- sqldf(s)
+    links <- data.frame(RegionA=x$Region_A, RegionB=x$Region_B, w=1+x$Intensity_norm)
+    net <- graph_from_data_frame(links, nodes_c1c2, directed = F)
+    n <- paste("deg.cent_12_", i, sep="")
+    assign(n, strength(net, mode = "all", loops=T, weights = E(net)$w))
+    d <- data.frame(ID=regions_c1c2, Year=i, dcbw=get(n))
+    dcb_w <- rbind(dcb_w, d)
+  }
+  dc_w <- left_join(dc_w, dcb_w, by=c("ID","Year"))
+  dc_w <- dc_w %>%
+    mutate(dcbw = case_when(
+      ID %in% regions_c1 ~ dcbw/63,
+      ID %in% regions_c2 ~ dcbw/126
+      )
+    )  
+  remove(i,s,x,links,net,n,nodes_c1,nodes_c2,nodes_c1c2,d,dcb_w)  
 
     # Compile Degree Centrality [normalized / weighted] -----------------------------------------------
   year <- c(1991:2017)
@@ -756,6 +772,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   # Compute Harmonic Centrality [normalized / unweighted] ---------------------------------------------
   #C1: internal
   hc <- data.frame()
+  hcb <- data.frame()
   
   harm_cent11 <- data.frame()
     for (i in 1991:2017){
@@ -765,7 +782,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/126)
     d <- data.frame(year=i, harmonic_centrality= mean(get(h)))
     harm_cent11 <- rbind(harm_cent11, d)
-    d1 <- data.frame(ID=regions_c1,Year=i, c1=1, c2=0, border=0, hc=get(h))
+    d1 <- data.frame(ID=regions_c1,Year=i, hc=get(h))
     hc <- rbind(hc,d1)
   }
     #C1-C2: external
@@ -774,11 +791,11 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
       n <- paste("net_12_", i, sep="")
       x <- get(n)
       h <- paste("harm.cent_12_", i, sep="")
-      assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/189)
+      assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
       d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
       harm_cent12 <- rbind(harm_cent12, d)
-      d1 <- data.frame(ID=regions_c1c2,Year=i, c1=1, c2=1, border=1, hc=get(h))
-      hc <- rbind(hc,d1)      
+      d1 <- data.frame(ID=regions_c1c2,Year=i, hcb=get(h))
+      hcb <- rbind(hcb,d1)      
     }
       #C2: internal
       harm_cent22 <- data.frame()
@@ -789,10 +806,17 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/63)
         d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
         harm_cent22 <- rbind(harm_cent22, d)
-        d1 <- data.frame(ID=regions_c2,Year=i, c1=0, c2=1, border=0, hc=get(h))
+        d1 <- data.frame(ID=regions_c2,Year=i, hc=get(h))
         hc <- rbind(hc,d1)        
       }
-      remove(x,i,n,h,d,d1)
+      hc <- left_join(hc, hcb, by=c("ID","Year"))
+      hc <- hc %>%
+        mutate(hcb = case_when(
+          ID %in% regions_c1 ~ hcb/189, #same weight because harmonic centraliy contains indirect conncetions
+          ID %in% regions_c2 ~ hcb/189
+          )
+        )      
+      remove(x,i,n,h,d,d1,hcb)
 
       #plot 1  
       par(old.par)
@@ -839,6 +863,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   # Compute Harmonic Centrality [normalized / weighted] ---------------------------------------------
         #C1: internal
         hc_w <- data.frame()
+        hcb_w <- data.frame()
         
         harm_cent11 <- data.frame()
         for (y in 1991:2017){
@@ -848,7 +873,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/126)
           d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent11 <- rbind(harm_cent11, d)
-          d1 <- data.frame(ID=regions_c1,Year=y, c1=1, c2=0, border=0, hcw=get(h))
+          d1 <- data.frame(ID=regions_c1,Year=y, hcw=get(h))
           hc_w <- rbind(hc_w,d1)          
         }
         #C1-C2: external
@@ -857,11 +882,11 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           n <- paste("net_12_", y, sep="")
           x <- get(n)
           h <- paste("harm.cent_12_", y, sep="")
-          assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/189)
+          assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2))
           d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent12 <- rbind(harm_cent12, d)
-          d1 <- data.frame(ID=regions_c1c2,Year=y, c1=1, c2=1, border=1, hcw=get(h))
-          hc_w <- rbind(hc_w,d1)            
+          d1 <- data.frame(ID=regions_c1c2,Year=y, hcbw=get(h))
+          hcb_w <- rbind(hcb_w,d1)            
         }
         #C2: internal
         harm_cent22 <- data.frame()
@@ -872,10 +897,17 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/63)
           d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent22 <- rbind(harm_cent22, d)
-          d1 <- data.frame(ID=regions_c2,Year=y, c1=0, c2=1, border=0, hcw=get(h))
+          d1 <- data.frame(ID=regions_c2,Year=y, hcw=get(h))
           hc_w <- rbind(hc_w,d1)            
         }
-        remove(x,y,n,h,d,d1)
+        hc_w <- left_join(hc_w, hcb_w, by=c("ID","Year"))
+        hc_w <- hc_w %>%
+          mutate(hcbw = case_when(
+            ID %in% regions_c1 ~ hcbw/189,
+            ID %in% regions_c2 ~ hcbw/189
+            )
+          )      
+        remove(x,y,n,h,d,d1,hcb_w)
         
         #plot 1  
         par(old.par)
@@ -935,34 +967,35 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         coeftest(fyl)
 
     #Degree centrality ~ border [unweighted] 
-        dc_py <- plm(dc ~ border, 
+        dc_py <- plm(dcb ~ dc, 
                    data = dc,
-                   index = c("Year"),
+                   index = c("ID","Year"),
                    model = "within")
       coeftest(dc_py)
       
     #Degree centrality ~ border [weighted]
-      dc_w_py <- plm(dcw ~ border, 
+      dc_w_py <- plm(dcbw ~ dcw, 
                   data = dc_w, 
-                  index = c("Year"),
+                  index = c("ID","Year"),
                   model = "within")
       coeftest(dc_w_py)     
-        
-    #Degree centrality ~ border [unweighted] 
-      hc_py <- plm(hc ~ border, 
+
+#fixed effect regression on harmonic centrality works but the results can not easily or even 
+#meaninfully be interpreted.
+    #Harmonic centrality ~ border [unweighted] 
+      hc_py <- plm(hcb ~ hc, 
                    data = hc,
-                   index = c("Year"),
+                   index = c("ID","Year"),
                    model = "within")
       coeftest(hc_py)
       
     #Degree centrality ~ border [weighted]
-      hc_w_py <- plm(hcw ~ border, 
+      hc_w_py <- plm(hcbw ~ hcw, 
                      data = hc_w, 
                      index = c("Year"),
                      model = "within")
       coeftest(hc_w_py)        
 
-      
 #### THE CODE GRAVEYARD / SCRIPTS OF THE DEAD -----------------------------------------------------------
       # TEST duplicate rows full set [No DUPLICATES!!!] -------------------------------------------------
     test_doubles <- data.frame()
