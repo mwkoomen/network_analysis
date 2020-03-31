@@ -56,72 +56,73 @@ old.par <- par(no.readonly = TRUE)
     )
   cor(par_set$Intensity, par_set$Intensity_norm) == 1
   
-#order regions so that they are consistant across years
+#Order regions so that they are consistant across years
   t1 <- par_set %>%
     filter(Region_A <= Region_B) %>%
-    select(Year, Region_A, Country_A, Region_B, Country_B, Intensity, Intensity_norm)
+    select(
+      Year, 
+      Region_A, 
+      Country_A, 
+      Region_B, 
+      Country_B, 
+      Intensity, 
+      Intensity_norm)
   t2 <- par_set %>%
     filter(Region_A > Region_B) %>%
-    select(Year, Region_B=Region_A, Country_B=Country_A, Region_A=Region_B, Country_A=Country_B, 
-           Intensity, Intensity_norm)
+    select(
+      Year, 
+      Region_B=Region_A, 
+      Country_B=Country_A, 
+      Region_A=Region_B, 
+      Country_A=Country_B, 
+      Intensity, 
+      Intensity_norm)
   par_set <- rbind(t1, t2)
   remove(t1,t2)
   
-#add dummies for autolink (region connected to itself) and links across borders
+#Add dummies for auto-link (region connected to itself) 
   par_set <- par_set %>%
-    mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) %>%
+    mutate(autolink=ifelse(Country_A==Country_B & Region_A==Region_B, 1, 0)) 
+
+#Add dummies for links across borders    
+  par_set <- par_set %>%
     mutate(border=ifelse(Country_A!=Country_B, 1, 0))
 
-#add dummies for countries 1&2 per link (and not per region)
+#Add dummies for countries 1&2 per link (and not per region)
 par_set <- par_set %>% 
   mutate(c1=ifelse(Country_A==1|Country_B==1, 1,0)) %>%
   mutate(c2=ifelse(Country_A==2|Country_B==2, 1,0))
 
-#add ID for link 
+#Add ID for link 
   par_set$edge1 <- paste(par_set$Region_A, "-", par_set$Region_B, sep="")
+  
   par_set$edge2 <- paste(par_set$Region_B, "-", par_set$Region_A, sep="")
-
-#test for duplicate rows (should return: FALSE)
-  test_doubles <- data.frame()
-  for (c1 in 1:2){
-    for (c2 in 1:2){
-      for (y in 1991:2017) {
-        s <- paste("select count(*) 
-                   from par_set where Year=",y,
-                   " and Country_A=",c1,
-                   " and Country_B=",c2, 
-                   " and autolink=0", sep="")
-        r <- as.numeric(sqldf(s))
-        f <- paste("select edge1 from par_set where Year=",y,
-                   " and Country_A=",c1,
-                   " and Country_B=",c2,
-                   " and autolink=0
-                   except 
-                   select edge2 from par_set where Year=",y,
-                   " and Country_A=",c1,
-                   " and Country_B=",c2,
-                   " and autolink=0", sep="")
-        t <- sqldf(f)
-        z <- data.frame(Year=y, CountryA=c1, no_doubles=nrow(t)==r)
-        test_doubles <- rbind(test_doubles, z)
-      }
-    }    
-  }
-  paste("Data has duplicate row: ", FALSE %in% test_doubles$no_doubles)  
-  remove(c1,c2,f,y,r,s,t,z, test_doubles)
-
+  
+#Create unique row id
+  par_set$rowid <- 
+    paste(
+      par_set$Year,"-",
+      par_set$edge1,"-", sep="")
+  
+#Test for duplicate rows
+  test <- sqldf("select rowid, count(rowid) 
+                from par_set group by rowid 
+                having count(rowid)>1")
+  paste("Data has no duplicate rows:",nrow(test)==0)
+  remove(test)  
+  
   # Create full data set ---------------------------------------------------------
-#IDs 
+
+  #IDs 
   #1 thru 22 are Country 2
   # 23 thru 99 are Country 1 
   # 100 thru 140 are Country 2  
   # 141 thru 189 are Country 1
+  regions_c1 <- c(23:99, 141:189)
+  regions_c2 <- c(1:22, 100:140) 
+  regions_c1c2 <- c(regions_c1,regions_c2)
   
-regions_c2 <- c(1:22, 100:140) 
-regions_c1 <- c(23:99, 141:189)
-regions_c1c2 <- c(regions_c1,regions_c2)
-  
-#test number of autolinks per year: 
+#Test number of autolinks per year: 
   autolink_count <- data.frame()
   for (i in 1991:2017){
     t <- paste("select Year, Country_A, count(Country_A) from par_set where autolink = 1 and Year=",i,
@@ -130,7 +131,8 @@ regions_c1c2 <- c(regions_c1,regions_c2)
     autolink_count <- rbind(autolink_count, test)
   } 
   remove(test,t,i)
-#which autolinks are missing:  
+  
+#Which autolinks are missing:  
   autolink_check <- data.frame()
   for (y in 1991:2017){
     t <- paste("select * from par_set where autolink = 1 and Year=",y,sep="")
@@ -143,13 +145,14 @@ regions_c1c2 <- c(regions_c1,regions_c2)
     }
   }
   remove(y,t,test,r,s1)
-#autolink for region 176 is missing for year 1991-1996
+  
+#Autolink for region 176 is missing for year 1991-1996
   #add as links with intensitiy 0 
   autolink_add <- data.frame(Year=1991:1996, Region_A=176, c1=1, 
                              Region_B=176, c2=0, Intensity=0)
   remove(autolink_check, autolink_count)
   
-#create a internal dummy region connection list country 1 to compare against the partial data 
+#Country 1: internal region connection list
   regions_int_c1 <- data.frame()
   for (a in regions_c1){
     for (i in regions_c1){
@@ -161,7 +164,7 @@ regions_c1c2 <- c(regions_c1,regions_c2)
     }
   remove(a,i,c)
 
-#create a internal dummy region connection list country 2 to compare against the partial data 
+#Country 2: internal region connection list
   regions_int_c2 <- data.frame()
   for (a in regions_c2){
     for (i in regions_c2){
@@ -173,7 +176,7 @@ regions_c1c2 <- c(regions_c1,regions_c2)
   }
   remove(a,i,c)
   
-#create a dummy internal region list for cross-border conncetions to compare against the partial data
+#Country 1-2: external region list for cross-border conncetions
   regions_ext <- data.frame()
   for (a in regions_c2){
     for (i in regions_c1){
@@ -182,7 +185,7 @@ regions_c1c2 <- c(regions_c1,regions_c2)
         }
       }
   remove(a,i,c)
-  #reorder
+  #Reorder external regions list
     t1 <- regions_ext %>%
       filter(Var1 <= Var2) %>%
       select(Var1, Var2)
