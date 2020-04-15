@@ -383,24 +383,37 @@ plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity",
     group_by(Year) %>%
     summarise(mean(Intensity))
   #plot
-    par(mfrow=c(1,2), oma = c(0, 0, 0, 0))
-    plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity", 
-         main = "Network Intensity (partial)", ylim=c(0,60000), lwd=2) 
-    lines(pc1c1, type = "l", col = "darkgreen", lwd=2)
-    lines(pc1c2, type = "l", col = "blue", lwd=2)
-    legend(1991, 60000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
-           col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n", lwd=2)
+    # par(mfrow=c(1,2), oma = c(0, 0, 0, 0))
+    # plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity", 
+    #      main = "Network Intensity (partial)", ylim=c(0,60000), lwd=2) 
+    # lines(pc1c1, type = "l", col = "darkgreen", lwd=2)
+    # lines(pc1c2, type = "l", col = "blue", lwd=2)
+    # legend(1991, 60000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
+    #        col=c("red", "darkgreen", "blue"), lty=1, cex=0.8, bty="n", lwd=2)
+    #     plot(fc1c1,type = "l",col = "darkgreen", xlab = "Year", ylab = "", 
+    #          main = "Network Intensity (full)", ylim=c(0, 60000), lty=2, lwd=2)
+    #     lines(pc1c1, type = "l", col = "darkgreen", lty=1, lwd=2)
+    #     lines(fc1c2, type = "l", col = "blue", lty=2, lwd=2)
+    #     lines(pc1c2, type = "l", col = "blue", lty=1, lwd=2)
+    #     lines(fc2c2, type = "l", col = "red", lty=2, lwd=2)
+    #     lines(pc2c2, type = "l", col = "red", lty=1, lwd=2)
+    #     legend(1991, 60000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
+    #            col=c("red", "darkgreen", "blue"), lty=2, cex=0.8, bty="n", lwd=2)
+    #     remove(fc1c1, fc2c2, fc1c2, pc1c1, pc1c2, pc2c2)
+        
+        par(old.par)
         plot(fc1c1,type = "l",col = "darkgreen", xlab = "Year", ylab = "", 
-             main = "Network Intensity (full)", ylim=c(0, 60000), lty=2, lwd=2)
+             main = "Link Intensity (Mean)", ylim=c(0, 60000), lty=2, lwd=2)
         lines(pc1c1, type = "l", col = "darkgreen", lty=1, lwd=2)
         lines(fc1c2, type = "l", col = "blue", lty=2, lwd=2)
         lines(pc1c2, type = "l", col = "blue", lty=1, lwd=2)
         lines(fc2c2, type = "l", col = "red", lty=2, lwd=2)
         lines(pc2c2, type = "l", col = "red", lty=1, lwd=2)
-        legend(1991, 60000, legend=c("C2:Internal", "C1:Internal", "C1-C2:External"),
-               col=c("red", "darkgreen", "blue"), lty=2, cex=0.8, bty="n", lwd=2)
-        remove(fc1c1, fc2c2, fc1c2, pc1c1, pc1c2, pc2c2)
-        
+        legend(1991, 60000, legend=c("C1:Internal (partial)", "C1:Internal (full)",
+                                     "C2:Internal (partial)", "C2:Internal (full)",
+                                     "C1-C2:External (partial)","C1-C2:External (full"),
+               col=c("darkgreen","darkgreen","red","red","blue","blue"), lty=1:2, cex=0.8, bty="n", lwd=2)
+                remove(fc1c1, fc2c2, fc1c2, pc1c1, pc1c2, pc2c2)
         
   
   # Count zeros --------------------------------------------
@@ -475,51 +488,51 @@ plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity",
 
 #plot c1  
   par(mfrow=c(2,3), oma = c(0,2,2,0))
-  plot(x=0:max(deg11_1), y=1-deg.dist11_1, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+  plot(x=0:max(deg11_1), y=1-deg.dist11_1, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
         xlab="1991", ylab="Cumulative Frequency", type = "h")
-  plot(x=0:max(deg11_2), y=1-deg.dist11_2, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+  plot(x=0:max(deg11_2), y=1-deg.dist11_2, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
         xlab="1996", ylab="", type = "h")
-  plot(x=0:max(deg11_3), y=1-deg.dist11_3, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+  plot(x=0:max(deg11_3), y=1-deg.dist11_3, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
         xlab="2001", ylab="", type = "h")
-  plot( x=0:max(deg11_4), y=1-deg.dist11_4, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+  plot( x=0:max(deg11_4), y=1-deg.dist11_4, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
         xlab="2006", ylab="Cumulative Frequency", type = "h")
-  plot( x=0:max(deg11_5), y=1-deg.dist11_5, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+  plot( x=0:max(deg11_5), y=1-deg.dist11_5, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
         xlab="2011", ylab="", type = "h")
-  plot(x=0:max(deg11_6), y=1-deg.dist11_6, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+  plot(x=0:max(deg11_6), y=1-deg.dist11_6, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
         xlab="2017", ylab="", type = "h")
   mtext("Country 1: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
 
 #plot c2  
   par(mfrow=c(2,3), oma = c(0,2,2,0))
-  plot( x=0:max(deg22_1), y=1-deg.dist22_1, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,64), 
+  plot( x=0:max(deg22_1), y=1-deg.dist22_1, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
         xlab="1991", ylab="Cumulative Frequency", type = "h")
-  plot( x=0:max(deg22_2), y=1-deg.dist22_2,  cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,64), 
+  plot( x=0:max(deg22_2), y=1-deg.dist22_2,  cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
         xlab="1996", ylab="", type = "h")
-  plot( x=0:max(deg22_3), y=1-deg.dist22_3, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,64), 
+  plot( x=0:max(deg22_3), y=1-deg.dist22_3, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
         xlab="2001", ylab="", type = "h")
-  plot( x=0:max(deg22_4), y=1-deg.dist22_4, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,64), 
+  plot( x=0:max(deg22_4), y=1-deg.dist22_4, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
         xlab="2006", ylab="Cumulative Frequency", type = "h")
-  plot( x=0:max(deg22_5), y=1-deg.dist22_5, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,64), 
+  plot( x=0:max(deg22_5), y=1-deg.dist22_5, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
         xlab="2011", ylab="", type = "h")
-  plot( x=0:max(deg22_6), y=1-deg.dist22_6, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,64), 
+  plot( x=0:max(deg22_6), y=1-deg.dist22_6, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
         xlab="2017", ylab="", type = "h")
   mtext("Country 2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
 
 #plot c1c2
   par(mfrow=c(2,3), oma = c(0,2,2,0))
-    plot(x=0:max(deg12_1), y=1-deg.dist12_1, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,126), 
+    plot(x=0:max(deg12_1), y=1-deg.dist12_1, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
         type="h", xlab="1991", ylab="Cumulative Frequency")
-    plot(x=0:max(deg12_2), y=1-deg.dist12_2, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,126), 
+    plot(x=0:max(deg12_2), y=1-deg.dist12_2, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
           type="h", xlab="1996", ylab="")
-    plot(x=0:max(deg12_3), y=1-deg.dist12_3, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,126), 
+    plot(x=0:max(deg12_3), y=1-deg.dist12_3, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
           type="h", xlab="2001", ylab="")
-    plot(x=0:max(deg12_4), y=1-deg.dist12_4, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,126), 
+    plot(x=0:max(deg12_4), y=1-deg.dist12_4, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
           type="h", xlab="2006", ylab="Cumulative Frequency") 
-    plot(x=0:max(deg12_5), y=1-deg.dist12_5, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,126), 
+    plot(x=0:max(deg12_5), y=1-deg.dist12_5, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
           type="h", xlab="2011", ylab="")
-    plot(x=0:max(deg12_6), y=1-deg.dist12_6, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,126), 
+    plot(x=0:max(deg12_6), y=1-deg.dist12_6, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
           type="h", xlab="2017", ylab="")    
-    mtext("Cross-country 1-2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+    mtext("Country 1-2 (External): Degree centraliy distribution", outer=TRUE, cex=1, font=2)
 
 remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
        deg22_1,deg22_2,deg22_3,deg22_4,deg22_5,deg22_6,
@@ -676,12 +689,12 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
     # Plot Degree Centrality [normalized] --------------------------------------------------------------------
   #plot  
   par(old.par)
-  plot(degree_centrality11$year,1-degree_centrality11$cn, type = "l",col = "red", xlab = "Year", ylab = "Degree Centrality (Mean)", 
+  plot(degree_centrality11$year,1-degree_centrality11$cn, type = "l",col = "darkgreen", xlab = "Year", ylab = "Degree Centrality (Mean)", 
        main = "Degree centrality [normalized / unweighted]", ylim = c(0.4,1),lwd=2) 
   lines(degree_centrality12$year, 1-degree_centrality12$cn, type = "l", col = "blue",lwd=2) 
-  lines(degree_centrality22$year, 1-degree_centrality22$cn, type = "l", col = "darkgreen",lwd=2)
+  lines(degree_centrality22$year, 1-degree_centrality22$cn, type = "l", col = "red",lwd=2)
   legend(1991, 1, legend=c("C1:Internal", "C2:Internal", "C1-C2:External"),
-         col=c("red", "darkgreen","blue"), lty=1, cex=0.8, bty = "n",lwd=2)  
+         col=c("darkgreen", "red","blue"), lty=1, cex=0.8, bty = "n",lwd=2)  
  
   # Compute and plot degree centrality [normalized] [weighted] --------------------------------------
   nodes_c1 <- data.frame(ID=regions_c1)
@@ -795,7 +808,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
       n <- paste("net_12_", i, sep="")
       x <- get(n)
       h <- paste("harm.cent_12_", i, sep="")
-      assign(h, harmonic_centrality(x, mode = "all", weights = NULL))
+      assign(h, harmonic_centrality(x, mode = "all", weights = NULL)/189)
       d <- data.frame(year=i, harmonic_centrality=mean(get(h)))
       harm_cent12 <- rbind(harm_cent12, d)
       d1 <- data.frame(ID=regions_c1c2,Year=i, hcb=get(h))
@@ -814,12 +827,12 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         hc <- rbind(hc,d1)        
       }
       hc <- left_join(hc, hcb, by=c("ID","Year"))
-      hc <- hc %>%
-        mutate(hcb = case_when(
-          ID %in% regions_c1 ~ hcb/189, #same weight because harmonic centraliy contains indirect conncetions
-          ID %in% regions_c2 ~ hcb/189
-          )
-        )      
+      # hc <- hc %>%
+      #   mutate(hcb = case_when(
+      #     ID %in% regions_c1 ~ hcb/189, #same weight because harmonic centraliy contains indirect conncetions
+      #     ID %in% regions_c2 ~ hcb/189
+      #     )
+      #   )      
       remove(x,i,n,h,d,d1,hcb)
 
       #plot 1  
@@ -835,32 +848,37 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         b <- adjustcolor("blue", alpha.f = 0.2)
         r <- adjustcolor("red", alpha.f = 0.2)
         g <- adjustcolor("green", alpha.f = 0.2)
-        par(mfrow=c(2,2), oma=c(0,0,2,0))
-        plot(density(harm.cent_11_1991), xlab="", ylab="# nodes", main="Country 1: Internal links", cex=0.8, 
+        par(mfrow=c(3,1), oma=c(0,0,2,0))
+        plot(density(harm.cent_11_1991), xlab="", ylab="# of nodes", main="Country 1: Internal links", cex=0.8, 
              col="red", xlim = c(0,1),ylim=c(0,40)) 
+        legend(0, 53, legend=c("1991","2001", "2017"),
+               col=c(r,b,g), lty=NA, pch=21, cex=1, bty = "n", lwd=20, xpd = "NA") 
         polygon(density(harm.cent_11_1991), col=r, border="black")
         lines(density(harm.cent_11_2001), col="blue")
         polygon(density(harm.cent_11_2001), col=b, border="black")
         lines(density(harm.cent_11_2017), col="green")
         polygon(density(harm.cent_11_2017), col=g, border="black")
         
-        plot(density(harm.cent_12_1991), xlab="", ylab="", main="Country 1-2: External links", cex=0.8, 
-             col="red", xlim = c(0,1),ylim=c(0,40)) 
-        polygon(density(harm.cent_12_1991), col=r, border="black")
-        lines(density(harm.cent_12_2001), col="blue")
-        polygon(density(harm.cent_12_2001), col=b, border="black")
-        lines(density(harm.cent_12_2017), col="green")
-        polygon(density(harm.cent_12_2017), col=g, border="black")
-        
-        plot(density(harm.cent_22_1991), xlab="", ylab="# nodes", main="Country 2: Internal links", cex=0.8, 
-             col="red", xlim = c(0,1),ylim=c(0,40)) 
+        plot(density(harm.cent_22_1991), xlab="", ylab="# of nodes", main="Country 2: Internal links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40))
+        legend(0, 53, legend=c("1991","2001", "2017"),
+               col=c(r,b,g), lty=NA, pch=21, cex=1, bty = "n", lwd=20, xpd = "NA") 
         polygon(density(harm.cent_22_1991), col=r, border="black")
         lines(density(harm.cent_22_2001), col="blue")
         polygon(density(harm.cent_22_2001), col=b, border="black")
         lines(density(harm.cent_22_2017), col="green")
         polygon(density(harm.cent_22_2017), col=g, border="black")
-        legend(1.2, 40, legend=c("1991","2001", "2017"),
-               col=c(r,b,g), lty=NA, pch=21, cex=1.2, bty = "n", lwd=32, xpd = "NA") 
+        
+        plot(density(harm.cent_12_1991), xlab="", ylab="# of nodes", main="Country 1-2: External links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,40))
+         legend(0, 53, legend=c("1991","2001", "2017"),
+                col=c(r,b,g), lty=NA, pch=21, cex=1, bty = "n", lwd=20, xpd = "NA") 
+        polygon(density(harm.cent_12_1991), col=r, border="black")
+        lines(density(harm.cent_12_2001), col="blue")
+        polygon(density(harm.cent_12_2001), col=b, border="black")
+        lines(density(harm.cent_12_2017), col="green")
+        polygon(density(harm.cent_12_2017), col=g, border="black")
+                
         mtext("Harmonic Centrality [normalized / unweighted]", 
               outer=TRUE, cex=1, font=2)
         
@@ -886,7 +904,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           n <- paste("net_12_", y, sep="")
           x <- get(n)
           h <- paste("harm.cent_12_", y, sep="")
-          assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2))
+          assign(h, harmonic_centrality(x, mode = "all", weights =1+E(x)$w2)/189)
           d <- data.frame(year=y, harmonic_centrality=mean(get(h)))
           harm_cent12 <- rbind(harm_cent12, d)
           d1 <- data.frame(ID=regions_c1c2,Year=y, hcbw=get(h))
@@ -905,12 +923,12 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
           hc_w <- rbind(hc_w,d1)            
         }
         hc_w <- left_join(hc_w, hcb_w, by=c("ID","Year"))
-        hc_w <- hc_w %>%
-          mutate(hcbw = case_when(
-            ID %in% regions_c1 ~ hcbw/189,
-            ID %in% regions_c2 ~ hcbw/189
-            )
-          )      
+        # hc_w <- hc_w %>%
+        #   mutate(hcbw = case_when(
+        #     ID %in% regions_c1 ~ hcbw/189,
+        #     ID %in% regions_c2 ~ hcbw/189
+        #     )
+        #   )      
         remove(x,y,n,h,d,d1,hcb_w)
         
         #plot 1  
@@ -926,32 +944,37 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         b <- adjustcolor("blue", alpha.f = 0.2)
         r <- adjustcolor("red", alpha.f = 0.2)
         g <- adjustcolor("green", alpha.f = 0.2)
-        par(mfrow=c(2,2), oma=c(0,0,2,0))
+        par(mfrow=c(3,1), oma=c(0,0,2,0))
         plot(density(harm.cent_11_1991), xlab="", ylab="# nodes", main="Country 1: Internal links", cex=0.8, 
-             col="red", xlim = c(0,1),ylim=c(0,40)) 
+             col="red", xlim = c(0,1),ylim=c(0,45)) 
+        legend(0, 58, legend=c("1991","2001", "2017"),
+               col=c(r,b,g), lty=NA, pch=21, cex=1, bty = "n", lwd=20, xpd = "NA") 
         polygon(density(harm.cent_11_1991), col=r, border="black")
         lines(density(harm.cent_11_2001), col="blue")
         polygon(density(harm.cent_11_2001), col=b, border="black")
         lines(density(harm.cent_11_2017), col="green")
         polygon(density(harm.cent_11_2017), col=g, border="black")
         
+        plot(density(harm.cent_22_1991), xlab="", ylab="# nodes", main="Country 2: Internal links", cex=0.8, 
+             col="red", xlim = c(0,1),ylim=c(0,45))
+        legend(0, 58, legend=c("1991","2001", "2017"),
+               col=c(r,b,g), lty=NA, pch=21, cex=1, bty = "n", lwd=20, xpd = "NA") 
+        polygon(density(harm.cent_22_1991), col=r, border="black")
+        lines(density(harm.cent_22_2001), col="blue")
+        polygon(density(harm.cent_22_2001), col=b, border="black")
+        lines(density(harm.cent_22_2017), col="green")
+        polygon(density(harm.cent_22_2017), col=g, border="black")
+
         plot(density(harm.cent_12_1991), xlab="", ylab="", main="Country 1-2: External links", cex=0.8, 
-             col="red", xlim = c(0,1),ylim=c(0,40)) 
+             col="red", xlim = c(0,1),ylim=c(0,45))
+        legend(0, 58, legend=c("1991","2001", "2017"),
+               col=c(r,b,g), lty=NA, pch=21, cex=1, bty = "n", lwd=20, xpd = "NA") 
         polygon(density(harm.cent_12_1991), col=r, border="black")
         lines(density(harm.cent_12_2001), col="blue")
         polygon(density(harm.cent_12_2001), col=b, border="black")
         lines(density(harm.cent_12_2017), col="green")
         polygon(density(harm.cent_12_2017), col=g, border="black")
         
-        plot(density(harm.cent_22_1991), xlab="", ylab="# nodes", main="Country 2: Internal links", cex=0.8, 
-             col="red", xlim = c(0,1),ylim=c(0,40)) 
-        polygon(density(harm.cent_22_1991), col=r, border="black")
-        lines(density(harm.cent_22_2001), col="blue")
-        polygon(density(harm.cent_22_2001), col=b, border="black")
-        lines(density(harm.cent_22_2017), col="green")
-        polygon(density(harm.cent_22_2017), col=g, border="black")
-        legend(1.2, 40, legend=c("1991","2001", "2017"),
-               col=c(r,b,g), lty=NA, pch=21, cex=1.2, bty = "n", lwd=32, xpd = "NA") 
         mtext("Harmonic Centrality [normalized / weighted]", 
               outer=TRUE, cex=1, font=2)
         
