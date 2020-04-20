@@ -436,15 +436,24 @@ plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity",
   zc1c2$link <- "Country 1-2: External"
   zc2c2$link <- "Country 2: Internal"
   zero.vertices <- rbind(zc1c1, zc1c2, zc2c2)  
-  remove(zc1c1, zc1c2, zc2c2)
-  
-   p <- ggplot(zero.vertices, aes(Year, share))
-   p +  ggtitle("Share of regions with no connections") + 
-     theme(plot.title = element_text(hjust = 0.5)) +
-     geom_smooth(aes(colour = factor(link))) +
-     coord_cartesian(xlim = c(1991, 2017), ylim = c(0, 0.25))
-   remove(p, zero.vertices)
-  
+
+   # p <- ggplot(zero.vertices, aes(Year, share))
+   # p +  ggtitle("Share of regions with no connections") + 
+   #   theme(plot.title = element_text(hjust = 0.5)) +
+   #   geom_smooth(aes(colour = factor(link))) +
+   #   coord_cartesian(xlim = c(1991, 2017), ylim = c(0, 0.25))
+   # remove(p, zero.vertices)
+
+   #plot
+   plot(zc2c2$Year, zc2c2$share, type = "l",col = "red", xlab = "Year", ylab = "Share", 
+        main = "Share of regions with no connections", ylim=c(0,0.2), lwd=2) 
+   lines(zc1c1$Year,zc1c1$share, type = "l", col = "darkgreen", lwd=2)
+   lines(zc1c2$Year,zc1c2$share, type = "l", col = "blue", lwd=2)
+   legend(2008, 0.2, legend=c("C1:Internal", "C2:Internal", "C1-C2:External"),
+          col=c("darkgreen", "red", "blue"), lty=1, cex=0.8, bty="n", lwd=2)
+   remove(zc1c1, zc1c2, zc2c2)
+   
+     
   # Degree distibution plots [not normalized] [unweighted] ------------------------------------------------
 #C1-2 external links 
   deg12_1 <- degree(net_12_1991)
