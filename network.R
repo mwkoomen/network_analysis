@@ -993,29 +993,23 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
         pyl <- plm(Intensity_norm ~ border,
                   data = par_set, 
                   index = c("edge1", "Year"),
-                  model = "within")
-        coeftest(pyl)
+                  model = "between")
+        summary(pyl)
         #full set
         fyl <- plm(Intensity_norm ~ border, 
                   data = full_set,
                   index = c("edge1", "Year"), 
-                  model = "within")
-        coeftest(fyl)
+                  model = "between")
+        summary(fyl)
 
-    #Degree centrality ~ border [unweighted] 
+    #Degree centrality ~ border 
         dc_py <- plm(dcb ~ dc, 
                    data = dc,
                    index = c("ID","Year"),
-                   model = "within")
-      coeftest(dc_py)
-      
-    #Degree centrality ~ border [weighted]
-      dc_w_py <- plm(dcbw ~ dcw, 
-                  data = dc_w, 
-                  index = c("ID","Year"),
-                  model = "within")
-      coeftest(dc_w_py)     
-
+                   model = "within", 
+                   effect = "twoways")
+      summary(dc_py)
+     
 #fixed effect regression on harmonic centrality works but the results can not easily or even 
 #meaninfully be interpreted.
     #Harmonic centrality ~ border [unweighted] 
