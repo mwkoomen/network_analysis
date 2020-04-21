@@ -495,53 +495,107 @@ plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity",
   deg.dist22_5 <- degree_distribution(net_22_2011, cumulative=T)
   deg.dist22_6 <- degree_distribution(net_22_2017, cumulative=T)
 
-#plot c1  
-  par(mfrow=c(2,3), oma = c(0,2,2,0))
-  plot(x=0:max(deg11_1), y=1-deg.dist11_1, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
-        xlab="1991", ylab="Cumulative Frequency", type = "h")
-  plot(x=0:max(deg11_2), y=1-deg.dist11_2, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
-        xlab="1996", ylab="", type = "h")
-  plot(x=0:max(deg11_3), y=1-deg.dist11_3, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
-        xlab="2001", ylab="", type = "h")
-  plot( x=0:max(deg11_4), y=1-deg.dist11_4, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
-        xlab="2006", ylab="Cumulative Frequency", type = "h")
-  plot( x=0:max(deg11_5), y=1-deg.dist11_5, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
-        xlab="2011", ylab="", type = "h")
-  plot(x=0:max(deg11_6), y=1-deg.dist11_6, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
-        xlab="2017", ylab="", type = "h")
+#new plots
+  par(mfrow=c(2,3), oma = c(0,2,2,0))  
+  plot(sort(deg11_1/126), xlab="", ylab="degree centrality", ylim=c(0,1), col="darkgreen")
+  plot(sort(deg11_2/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
+  plot(sort(deg11_3/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
+  plot(sort(deg11_4/126), xlab="", ylab="degree centrality", ylim=c(0,1), col="darkgreen")
+  plot(sort(deg11_5/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
+  plot(sort(deg11_6/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
   mtext("Country 1: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
-
-#plot c2  
-  par(mfrow=c(2,3), oma = c(0,2,2,0))
-  plot( x=0:max(deg22_1), y=1-deg.dist22_1, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
-        xlab="1991", ylab="Cumulative Frequency", type = "h")
-  plot( x=0:max(deg22_2), y=1-deg.dist22_2,  cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
-        xlab="1996", ylab="", type = "h")
-  plot( x=0:max(deg22_3), y=1-deg.dist22_3, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
-        xlab="2001", ylab="", type = "h")
-  plot( x=0:max(deg22_4), y=1-deg.dist22_4, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
-        xlab="2006", ylab="Cumulative Frequency", type = "h")
-  plot( x=0:max(deg22_5), y=1-deg.dist22_5, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
-        xlab="2011", ylab="", type = "h")
-  plot( x=0:max(deg22_6), y=1-deg.dist22_6, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
-        xlab="2017", ylab="", type = "h")
+  
+  par(mfrow=c(2,3), oma = c(0,2,2,0))  
+  plot(sort(deg22_1/63), xlab="", ylab="degree centrality", ylim=c(0,1), col="red")
+  plot(sort(deg22_2/63), xlab="", ylab="", ylim=c(0,1), col="red")
+  plot(sort(deg22_3/63), xlab="", ylab="", ylim=c(0,1), col="red")
+  plot(sort(deg22_4/63), xlab="", ylab="degree centrality", ylim=c(0,1), col="red")
+  plot(sort(deg22_5/63), xlab="", ylab="", ylim=c(0,1), col="red")
+  plot(sort(deg22_6/63), xlab="", ylab="", ylim=c(0,1), col="red")
   mtext("Country 2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
-
-#plot c1c2
-  par(mfrow=c(2,3), oma = c(0,2,2,0))
-    plot(x=0:max(deg12_1), y=1-deg.dist12_1, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
-        type="h", xlab="1991", ylab="Cumulative Frequency")
-    plot(x=0:max(deg12_2), y=1-deg.dist12_2, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
-          type="h", xlab="1996", ylab="")
-    plot(x=0:max(deg12_3), y=1-deg.dist12_3, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
-          type="h", xlab="2001", ylab="")
-    plot(x=0:max(deg12_4), y=1-deg.dist12_4, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
-          type="h", xlab="2006", ylab="Cumulative Frequency") 
-    plot(x=0:max(deg12_5), y=1-deg.dist12_5, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
-          type="h", xlab="2011", ylab="")
-    plot(x=0:max(deg12_6), y=1-deg.dist12_6, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
-          type="h", xlab="2017", ylab="")    
-    mtext("Country 1-2 (External): Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+  
+  intx <- c(rep(63,22),rep(126,77),rep(63,41), rep(126,49))
+  
+  intf1 <- data.frame(ID=1:189, dc=deg12_1/intx)
+  intf1$colour="darkgreen"
+  intf1$colour[intf1$ID %in% regions_c2]="red"
+  intf2 <- data.frame(ID=1:189, dc=deg12_2/intx)
+  intf2$colour="darkgreen"
+  intf2$colour[intf1$ID %in% regions_c2]="red"  
+  intf3 <- data.frame(ID=1:189, dc=deg12_3/intx)
+  intf3$colour="darkgreen"
+  intf3$colour[intf1$ID %in% regions_c2]="red"
+  intf4 <- data.frame(ID=1:189, dc=deg12_4/intx)
+  intf4$colour="darkgreen"
+  intf4$colour[intf1$ID %in% regions_c2]="red"
+  intf5 <- data.frame(ID=1:189, dc=deg12_5/intx)
+  intf5$colour="darkgreen"
+  intf5$colour[intf1$ID %in% regions_c2]="red"
+  intf6 <- data.frame(ID=1:189, dc=deg12_6/intx)
+  intf6$colour="darkgreen"
+  intf6$colour[intf1$ID %in% regions_c2]="red"
+  
+  
+  par(mfrow=c(2,3), oma = c(0,2,2,0))  
+  plot(sort(intf1$dc), xlab="", ylab="degree centrality", ylim=c(0,1), col=intf1$colour)
+  legend(0, 1, legend=c("Country 1","Country 2"),
+         col=c("darkgreen","red"), lty=NA, cex=1, bty="n", lwd=10, pch=21) 
+  plot(sort(intf2$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
+  plot(sort(intf3$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
+  plot(sort(intf4$dc), xlab="", ylab="degree centrality", ylim=c(0,1), col=intf1$colour)
+  plot(sort(intf5$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
+  plot(sort(intf6$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
+  mtext("Country 1-2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+  
+  remove(intx)
+  
+# #plot c1  
+#   par(mfrow=c(2,3), oma = c(0,2,2,0))
+#   plot(x=0:max(deg11_1), y=1-deg.dist11_1, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+#         xlab="1991", ylab="Cumulative Frequency", type = "h")
+#   plot(x=0:max(deg11_2), y=1-deg.dist11_2, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+#         xlab="1996", ylab="", type = "h")
+#   plot(x=0:max(deg11_3), y=1-deg.dist11_3, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+#         xlab="2001", ylab="", type = "h")
+#   plot( x=0:max(deg11_4), y=1-deg.dist11_4, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+#         xlab="2006", ylab="Cumulative Frequency", type = "h")
+#   plot( x=0:max(deg11_5), y=1-deg.dist11_5, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+#         xlab="2011", ylab="", type = "h")
+#   plot(x=0:max(deg11_6), y=1-deg.dist11_6, cex=1.2, col=rgb(0,0.5,0,alpha=1), ylim=c(0,1), xlim=c(0,127), 
+#         xlab="2017", ylab="", type = "h")
+#   mtext("Country 1: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+# 
+# #plot c2  
+#   par(mfrow=c(2,3), oma = c(0,2,2,0))
+#   plot( x=0:max(deg22_1), y=1-deg.dist22_1, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
+#         xlab="1991", ylab="Cumulative Frequency", type = "h")
+#   plot( x=0:max(deg22_2), y=1-deg.dist22_2,  cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
+#         xlab="1996", ylab="", type = "h")
+#   plot( x=0:max(deg22_3), y=1-deg.dist22_3, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
+#         xlab="2001", ylab="", type = "h")
+#   plot( x=0:max(deg22_4), y=1-deg.dist22_4, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
+#         xlab="2006", ylab="Cumulative Frequency", type = "h")
+#   plot( x=0:max(deg22_5), y=1-deg.dist22_5, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
+#         xlab="2011", ylab="", type = "h")
+#   plot( x=0:max(deg22_6), y=1-deg.dist22_6, cex=1.2, col=rgb(1,0.2,0.2, alpha=1), ylim=c(0,1), xlim=c(0,64), 
+#         xlab="2017", ylab="", type = "h")
+#   mtext("Country 2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+# 
+# #plot c1c2
+#   par(mfrow=c(2,3), oma = c(0,2,2,0))
+#     plot(x=0:max(deg12_1), y=1-deg.dist12_1, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
+#         type="h", xlab="1991", ylab="Cumulative Frequency")
+#     plot(x=0:max(deg12_2), y=1-deg.dist12_2, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
+#           type="h", xlab="1996", ylab="")
+#     plot(x=0:max(deg12_3), y=1-deg.dist12_3, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
+#           type="h", xlab="2001", ylab="")
+#     plot(x=0:max(deg12_4), y=1-deg.dist12_4, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
+#           type="h", xlab="2006", ylab="Cumulative Frequency") 
+#     plot(x=0:max(deg12_5), y=1-deg.dist12_5, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
+#           type="h", xlab="2011", ylab="")
+#     plot(x=0:max(deg12_6), y=1-deg.dist12_6, cex=1.2, col=rgb(0,0.4,0.8,alpha=1), ylim=c(0,1), xlim=c(0,126), 
+#           type="h", xlab="2017", ylab="")    
+#     mtext("Country 1-2 (External): Degree centraliy distribution", outer=TRUE, cex=1, font=2)
 
 remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
        deg22_1,deg22_2,deg22_3,deg22_4,deg22_5,deg22_6,
