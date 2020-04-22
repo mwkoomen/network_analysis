@@ -1044,17 +1044,19 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   # Fixed effects regressions ------------------------------------------------
     #Intensity ~ border (with year and link) 
         #partial set 
-        pyl <- plm(Intensity_norm ~ border,
+        pyl <- plm(log(1+Intensity) ~ border,
                   data = par_set, 
-                  index = c("edge1", "Year"),
-                  model = "between")
+                  index = c("Year"),
+                  effect = "time",
+                  model = "within")
         summary(pyl)
         #full set
-        fyl <- plm(Intensity_norm ~ border, 
-                  data = full_set,
-                  index = c("edge1", "Year"), 
-                  model = "between")
-        summary(fyl)
+         fyl <- plm(log(1+Intensity) ~ border, 
+                   data = full_set,
+                   index = c("Year"),
+                   effect = "time",
+                   model = "within")
+         summary(fyl)
 
     #Degree centrality ~ border 
         dc_py <- plm(dcb ~ dc, 
