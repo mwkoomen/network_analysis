@@ -216,6 +216,7 @@ par_set <- par_set %>%
 #add autolinks 
   full_set <- rbind(full_set, autolink_add)
   remove(autolink_add)
+  
 #country 1: internal
   for (y in 1991:2017) {
     t <- paste("select edge1 from regions_int_c1  
@@ -232,6 +233,7 @@ par_set <- par_set %>%
     addrow <- sqldf(a)
     full_set <- rbind(full_set, addrow)
   }
+  
   #country 2: internal
     for (y in 1991:2017) {
       t <- paste("select edge1 from regions_int_c2  
@@ -248,6 +250,7 @@ par_set <- par_set %>%
       addrow <- sqldf(a)
       full_set <- rbind(full_set, addrow)
     }
+  
     #country 1-2 external
       for (y in 1991:2017) {
         t <- paste("select edge1 from regions_ext  
@@ -264,6 +267,7 @@ par_set <- par_set %>%
         addrow <- sqldf(a)
         full_set <- rbind(full_set, addrow)
       }
+  
       remove(t,y,a,test,addrow, regions_int_c1, regions_int_c2,regions_ext)
 
 #add dummies for autolink (region connected to itself) and links across borders
@@ -497,22 +501,22 @@ plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity",
 
 #new plots
   par(mfrow=c(2,3), oma = c(0,2,2,0))  
-  plot(sort(deg11_1/126), xlab="", ylab="degree centrality", ylim=c(0,1), col="darkgreen")
-  plot(sort(deg11_2/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
-  plot(sort(deg11_3/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
-  plot(sort(deg11_4/126), xlab="", ylab="degree centrality", ylim=c(0,1), col="darkgreen")
-  plot(sort(deg11_5/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
-  plot(sort(deg11_6/126), xlab="", ylab="", ylim=c(0,1), col="darkgreen")
-  mtext("Country 1: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+  plot(sort(deg11_1/126), xlab="regions", ylab="degree centrality", ylim=c(0,1), col="darkgreen", main="1991")
+  plot(sort(deg11_2/126), xlab="regions", ylab="", ylim=c(0,1), col="darkgreen", main="1996")
+  plot(sort(deg11_3/126), xlab="regions", ylab="", ylim=c(0,1), col="darkgreen", main="2001")
+  plot(sort(deg11_4/126), xlab="regions", ylab="degree centrality", ylim=c(0,1), col="darkgreen", main="2006")
+  plot(sort(deg11_5/126), xlab="regions", ylab="", ylim=c(0,1), col="darkgreen", main="2011")
+  plot(sort(deg11_6/126), xlab="regions", ylab="", ylim=c(0,1), col="darkgreen", main="2017")
+  mtext("", outer=TRUE, cex=1, font=2)
   
   par(mfrow=c(2,3), oma = c(0,2,2,0))  
-  plot(sort(deg22_1/63), xlab="", ylab="degree centrality", ylim=c(0,1), col="red")
-  plot(sort(deg22_2/63), xlab="", ylab="", ylim=c(0,1), col="red")
-  plot(sort(deg22_3/63), xlab="", ylab="", ylim=c(0,1), col="red")
-  plot(sort(deg22_4/63), xlab="", ylab="degree centrality", ylim=c(0,1), col="red")
-  plot(sort(deg22_5/63), xlab="", ylab="", ylim=c(0,1), col="red")
-  plot(sort(deg22_6/63), xlab="", ylab="", ylim=c(0,1), col="red")
-  mtext("Country 2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+  plot(sort(deg22_1/63), xlab="regions", ylab="degree centrality", ylim=c(0,1), col="red", main="1991")
+  plot(sort(deg22_2/63), xlab="regions", ylab="", ylim=c(0,1), col="red", main="1996")
+  plot(sort(deg22_3/63), xlab="regions", ylab="", ylim=c(0,1), col="red", main="2001")
+  plot(sort(deg22_4/63), xlab="regions", ylab="degree centrality", ylim=c(0,1), col="red", main="2006")
+  plot(sort(deg22_5/63), xlab="regions", ylab="", ylim=c(0,1), col="red", main="2011")
+  plot(sort(deg22_6/63), xlab="regions", ylab="", ylim=c(0,1), col="red", main="2017")
+  mtext("", outer=TRUE, cex=1, font=2)
   
   intx <- c(rep(63,22),rep(126,77),rep(63,41), rep(126,49))
   
@@ -537,15 +541,15 @@ plot(pc2c2,type = "l",col = "red", xlab = "Year", ylab = "Intensity",
   
   
   par(mfrow=c(2,3), oma = c(0,2,2,0))  
-  plot(sort(intf1$dc), xlab="", ylab="degree centrality", ylim=c(0,1), col=intf1$colour)
+  plot(sort(intf1$dc), xlab="", ylab="degree centrality", ylim=c(0,1), col=intf1$colour, main="1991")
   legend(0, 1, legend=c("Country 1","Country 2"),
          col=c("darkgreen","red"), lty=NA, cex=1, bty="n", lwd=10, pch=21) 
-  plot(sort(intf2$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
-  plot(sort(intf3$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
-  plot(sort(intf4$dc), xlab="", ylab="degree centrality", ylim=c(0,1), col=intf1$colour)
-  plot(sort(intf5$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
-  plot(sort(intf6$dc), xlab="", ylab="", ylim=c(0,1), col=intf1$colour)
-  mtext("Country 1-2: Degree centraliy distribution", outer=TRUE, cex=1, font=2)
+  plot(sort(intf2$dc), xlab="regions", ylab="", ylim=c(0,1), col=intf1$colour, main="1996")
+  plot(sort(intf3$dc), xlab="regions", ylab="", ylim=c(0,1), col=intf1$colour, main="2001")
+  plot(sort(intf4$dc), xlab="regions", ylab="degree centrality", ylim=c(0,1), col=intf1$colour, main="2006")
+  plot(sort(intf5$dc), xlab="regions", ylab="", ylim=c(0,1), col=intf1$colour, main="2011")
+  plot(sort(intf6$dc), xlab="regions", ylab="", ylim=c(0,1), col=intf1$colour, main="2017")
+  mtext("", outer=TRUE, cex=1, font=2)
   
   remove(intx)
   
@@ -1050,6 +1054,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
                   effect = "time",
                   model = "within")
         summary(pyl)
+          #robust standard errors. 
+          coeftest(pyl,vcov=vcovHC(pyl,cluster="time"))        
         #full set
          fyl <- plm(log(1+Intensity) ~ border, 
                    data = full_set,
@@ -1057,7 +1063,8 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
                    effect = "time",
                    model = "within")
          summary(fyl)
-
+           #robust standard errors. 
+           coeftest(fyl,vcov=vcovHC(fyl,cluster="time"))
     #Degree centrality ~ border 
         dc_py <- plm(dcb ~ dc, 
                    data = dc,
@@ -1065,6 +1072,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
                    model = "within", 
                    effect = "twoways")
       summary(dc_py)
+      coeftest(dc_py,vcov=vcovHC(dc_py,cluster=c("group", "time")))      
      
 #fixed effect regression on harmonic centrality works but the results can not easily or even 
 #meaninfully be interpreted.
