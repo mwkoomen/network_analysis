@@ -757,7 +757,7 @@ remove(deg11_1,deg11_2,deg11_3,deg11_4,deg11_5,deg11_6,
   #plot  
   par(old.par)
   plot(degree_centrality11$year,1-degree_centrality11$cn, type = "l",col = "darkgreen", xlab = "Year", ylab = "Degree Centrality (Mean)", 
-       main = "Degree centrality [normalized / unweighted]", ylim = c(0.4,1),lwd=2) 
+       main = "Degree centrality [normalized / unweighted]", ylim = c(0,1),lwd=2) 
   lines(degree_centrality12$year, 1-degree_centrality12$cn, type = "l", col = "blue",lwd=2) 
   lines(degree_centrality22$year, 1-degree_centrality22$cn, type = "l", col = "red",lwd=2)
   legend(1991, 1, legend=c("C1:Internal", "C2:Internal", "C1-C2:External"),
